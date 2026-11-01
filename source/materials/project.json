@@ -4,13 +4,8 @@
     "merge_source": ["../../tools/data/materials"],
     "include_patterns": [
       "Actor",
-      "ActorGlint",
-      "ActorMultiTexture",
       "Clouds",
       "EndSky",
-      "ItemInHandColor",
-      "ItemInHandColorGlint",
-      "ItemInHandTextured",
       "RenderChunk",
       "Sky",
       "Stars",
@@ -21,18 +16,6 @@
     "include_search_paths": ["../../source", "../../include"]
   },
   "profiles": {
-    "android": {
-      "macros": [],
-      "platforms": ["ESSL_310"]
-    },
-    "ios": {
-      "macros": [],
-      "platforms": ["Metal"]
-    },
-    "windows": {
-      "macros": [],
-      "platforms": ["Direct3D_SM50"]
-    },
     "multiplatform": {
       "macros": [],
       "platforms": ["ESSL_310", "Direct3D_SM50", "Metal"]
