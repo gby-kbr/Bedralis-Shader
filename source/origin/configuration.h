@@ -1,1 +1,26 @@
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
 
+#define SKY_DAY_ZENITH vec3(0.16, 0.38, 0.86)
+#define SKY_DAY_HORIZON vec3(0.62, 0.80, 0.97)
+
+#define SKY_NIGHT_ZENITH vec3(0.020, 0.030, 0.100)
+#define SKY_NIGHT_HORIZON vec3(0.070, 0.100, 0.230)
+
+#define SKY_SUNRISE_ZENITH vec3(0.26, 0.32, 0.62)
+#define SKY_SUNRISE_HORIZON vec3(1.00, 0.52, 0.34)
+#define SKY_SUNSET_ZENITH vec3(0.24, 0.24, 0.52)
+#define SKY_SUNSET_HORIZON vec3(1.00, 0.38, 0.14)
+
+#define SKY_RAIN_ZENITH vec3(0.30, 0.34, 0.40)
+#define SKY_RAIN_HORIZON vec3(0.52, 0.56, 0.62)
+#define SKY_RAIN_NIGHT_LIGHT 0.20
+
+#define SKY_END_ZENITH vec3(0.025, 0.000, 0.055)
+#define SKY_END_HORIZON vec3(0.300, 0.100, 0.380)
+#define SKY_END_GLOW vec3(0.420, 0.150, 0.520)
+#define SKY_END_STARS 2.0
+
+#define END_FOG_COLOR vec3(64.0, 0.0, 64.0)
+
+#endif
