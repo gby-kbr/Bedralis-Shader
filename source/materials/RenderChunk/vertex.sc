@@ -7,12 +7,17 @@ $output v_clipPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV
 
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
+#include "origin/function/fog.h"
 
 uniform vec4 RenderChunkFogAlpha;
 uniform vec4 FogAndDistanceControl;
 uniform vec4 ViewPositionAndTime;
 uniform vec4 FogColor;
 uniform vec4 MeshContext;
+uniform vec4 SkyColor;
+uniform vec4 TimeOfDay;
+uniform vec4 DimensionID;
+uniform vec4 RenderDistance;
 
 void main() {
 #ifdef INSTANCING
@@ -56,7 +61,16 @@ void main() {
 
     float camDist = length(ViewPositionAndTime.xyz - worldPos);
     float fogIntensity = clamp((((camDist / fogAndDist.z) + RenderChunkFogAlpha.x) - fogAndDist.x) / (fogAndDist.y - fogAndDist.x), 0.0, 1.0);
-    vec4 fog = vec4(FogColor.rgb, fogIntensity);
+    // Atmospheric fog: color matches the sky horizon, intensity adds height,
+    // horizon and rain fog to the engine's distance fog. lightmapY is used as sky exposure.
+    environment env = calculateEnvironment(
+        TimeOfDay.x,
+        FogColor.rgb,
+        vec3(FogAndDistanceControl.xy, RenderDistance.x),
+        DimensionID.x);
+    vec3 fogViewDir = (worldPos - ViewPositionAndTime.xyz) / max(camDist, 0.0001);
+    fogIntensity = atmosphericFogIntensity(env, fogIntensity, camDist / fogAndDist.z, worldPos.y, fogViewDir.y, lightmapY);
+    vec4 fog = vec4(atmosphericFogColor(env, fogViewDir, SkyColor.rgb, FogColor.rgb), fogIntensity);
 
 #if defined(TRANSPARENT)
     if (a_color0.a < 0.95) {

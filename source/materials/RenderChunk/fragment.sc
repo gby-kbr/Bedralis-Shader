@@ -67,7 +67,7 @@ void main() {
 #endif
 
     diffuse.rgb *= texture2D(s_LightMapTexture, v_lightmapUV).rgb;
-    diffuse.rgb = mix(diffuse.rgb, FogColor.rgb, v_fog.a);
+    diffuse.rgb = mix(diffuse.rgb, v_fog.rgb, v_fog.a);
 
     gl_FragColor = diffuse;
 #endif

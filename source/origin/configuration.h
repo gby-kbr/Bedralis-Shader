@@ -48,4 +48,11 @@
 #define STAR_RAIN_FADE 0.90   // how much stars fade at full rain
 #define MOON_NEW_LIGHT 0.25   // moonlight strength at new moon (full moon = 1.0)
 
+// ---- Atmospheric fog (Phase 04) ----
+#define HEIGHT_FOG_STRENGTH  0.22   // extra fog near the ground at far distance
+#define HEIGHT_FOG_BASE      64.0   // world height (blocks) below which height fog is at full strength
+#define HEIGHT_FOG_FALLOFF   0.035  // how fast height fog thins out above the base
+#define HORIZON_FOG_STRENGTH 0.20   // extra fog when looking along the horizon at far distance
+#define RAIN_FOG_STRENGTH    0.55   // extra fog at full rain
+
 #endif

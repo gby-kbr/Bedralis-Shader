@@ -8,6 +8,7 @@ $output v_color0, v_fog, v_occlusionHeight, v_occlusionUV, v_texcoord0, v_worldP
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/FogUtil.dragonh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
+#include "origin/function/fog.h"
 
 uniform vec4 Dimensions;
 uniform vec4 FogAndDistanceControl;
@@ -17,6 +18,10 @@ uniform vec4 PositionForwardOffset;
 uniform vec4 UVOffsetAndScale;
 uniform vec4 Velocity;
 uniform vec4 ViewPosition;
+uniform vec4 SkyColor;
+uniform vec4 TimeOfDay;
+uniform vec4 DimensionID;
+uniform vec4 RenderDistance;
 
 #if BGFX_SHADER_LANGUAGE_GLSL
     #if BGFX_SHADER_LANGUAGE_GLSL < 130
@@ -56,7 +61,15 @@ void main() {
     float occlusionHeight = (worldSpacePosition.y + ViewPosition.y - 0.5) * (1.0 / 255.0);
 
     float fogIntensity = calculateFogIntensity(position.z, FogAndDistanceControl.z, FogAndDistanceControl.x, FogAndDistanceControl.y);
-    vec4 fog = vec4(FogColor.rgb, fogIntensity);
+    // Only the fog color follows the atmosphere here; the intensity stays the engine's.
+    // worldSpacePosition is camera-relative, so it doubles as the view direction.
+    environment env = calculateEnvironment(
+        TimeOfDay.x,
+        FogColor.rgb,
+        vec3(FogAndDistanceControl.xy, RenderDistance.x),
+        DimensionID.x);
+    vec3 fogViewDir = normalize(worldSpacePosition);
+    vec4 fog = vec4(atmosphericFogColor(env, fogViewDir, SkyColor.rgb, FogColor.rgb), fogIntensity);
 
     v_color0 = a_color0;
     v_fog = fog;

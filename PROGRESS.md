@@ -7,7 +7,7 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 01 | Core architecture & environment detection | MERGED (not compiled / not tested in game) |
 | 02 | Sky color system | MERGED (not compiled / not tested in game) |
 | 03 | Celestial system | MERGED (not compiled / not tested in game) |
-| 04 | Atmospheric system | NOT STARTED |
+| 04 | Atmospheric system | MERGED (not compiled / not tested in game) |
 | 05 | Lighting system | NOT STARTED |
 | 06 | Water system | NOT STARTED |
 | 07 | Cloud system | NOT STARTED |
@@ -15,6 +15,22 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 04 details
+
+Done:
+- `fog.h`: `atmosphericFogColor()` (same function as the sky horizon, so terrain fades into the sky; vanilla color underwater and in The End) and `atmosphericFogIntensity()` (height, horizon and rain fog on top of the engine's distance fog; Overworld only).
+- `RenderChunk`, `Actor`, `Weather` vertex shaders: `v_fog` now carries the atmospheric color; `RenderChunk` fragment uses `v_fog.rgb` instead of the `FogColor` uniform.
+- `RenderChunk` uses the lightmap sky value as sky exposure so caves do not get sky-colored haze.
+- `configuration.h`: `HEIGHT_FOG_*`, `HORIZON_FOG_STRENGTH`, `RAIN_FOG_STRENGTH`.
+- Fixed before commit: a variable named `flat` (reserved word in GLSL) was renamed.
+
+Not done / deferred:
+- `Weather` only gets the fog color; rain streak fog intensity stays the engine's.
+- `Actor` and `Weather` have no sky exposure value (exposure = 1.0 for `Actor`); the extra fog is small at the short distances where this matters.
+- Clouds keep their vanilla distance fade (Phase 07).
+- Thunder fog: needs thunder detection.
+- Performance: `calculateEnvironment()` now runs per vertex for terrain; check in Phase 11.
 
 ## Phase 03 details
 

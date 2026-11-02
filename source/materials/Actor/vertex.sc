@@ -9,11 +9,16 @@ $output v_clipPosition, v_color0, v_fog, v_light, v_texcoord0, v_worldPos
 #include <MinecraftRenderer.Materials/DynamicUtil.dragonh>
 #include <MinecraftRenderer.Materials/FogUtil.dragonh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
+#include "origin/function/fog.h"
 
 uniform vec4 OverlayColor;
 uniform vec4 TileLightColor;
 uniform vec4 FogColor;
 uniform vec4 FogControl;
+uniform vec4 SkyColor;
+uniform vec4 TimeOfDay;
+uniform vec4 DimensionID;
+uniform vec4 RenderDistance;
 uniform vec4 UVAnimation;
 uniform mat4 Bones[8];
 
@@ -40,7 +45,18 @@ void main() {
     vec4 position = jitterVertexPosition(worldPosition);
     float cameraDepth = position.z;
     float fogIntensity = calculateFogIntensity(cameraDepth, FogControl.z, FogControl.x, FogControl.y);
-    vec4 fog = vec4(FogColor.rgb, fogIntensity);
+    // Atmospheric fog (see RenderChunk). Sky exposure is unknown here, so 1.0 is used.
+    environment env = calculateEnvironment(
+        TimeOfDay.x,
+        FogColor.rgb,
+        vec3(FogControl.xy, RenderDistance.x),
+        DimensionID.x);
+    vec3 camPos = mul(u_invView, vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    vec3 toVertex = worldPosition - camPos;
+    float vertexDist = length(toVertex);
+    vec3 fogViewDir = toVertex / max(vertexDist, 0.0001);
+    fogIntensity = atmosphericFogIntensity(env, fogIntensity, vertexDist / FogControl.z, worldPosition.y, fogViewDir.y, 1.0);
+    vec4 fog = vec4(atmosphericFogColor(env, fogViewDir, SkyColor.rgb, FogColor.rgb), fogIntensity);
 
 #if defined(DEPTH_ONLY) || defined(DEPTH_ONLY_OPAQUE)
     v_texcoord0 = vec2_splat(0.0);

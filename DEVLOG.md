@@ -1,5 +1,28 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 04: Atmospheric system
+
+Branch: `phase-04-atmospheric-system` (off main at `129e1af`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/fog.h`: new `combineFog`, `atmosphericFogColor`, `atmosphericFogIntensity`.
+- `source/origin/configuration.h`: fog macros.
+- `source/materials/RenderChunk/vertex.sc`, `Actor/vertex.sc`, `Weather/vertex.sc`: atmospheric fog color (and intensity for terrain and actors).
+- `source/materials/RenderChunk/fragment.sc`: fog mix uses `v_fog.rgb`.
+
+Problems found:
+- Fog is computed per vertex in the engine shaders, and the RenderChunk fragment read the `FogColor` uniform directly, which would have bypassed any custom fog color.
+- A variable named `flat` is a reserved GLSL word; renamed to `alongHorizon` before commit.
+- First tuning gave about 20% haze at half render distance in clear weather; strengths lowered (height 0.30 to 0.22, horizon 0.25 to 0.20).
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Python port of the fog math: no value outside 0..1 and fog is monotonic with distance. Clear midday extra fog about 0.15 / 0.27 / 0.35 at 50% / 80% / 100% distance; height fog 0.22 at y=64 and 0.03 at y=120; rain adds about 0.09 at 20% distance on top of the engine fog.
+- Preview rendered (terrain to fog over distance: midday, sunset, night, clear and rain). The engine fog start/end used in the preview come from the `detectRain` constants (clear 0.55..1.0, rain 0.23..0.70); real values were not measured.
+- In-game test: NOT run.
+
+Assumptions still unverified: the RenderChunk vertex world position is absolute (consistent with the engine's own `camDist` use); `v_lightmapUV.y` is the sky light; the `FogControl` uniform used by `Actor` carries the same data as `FogAndDistanceControl`. The `FogAndDistanceControl.json` added in Phase 02 may duplicate a definition from the missing `tools/data/materials`.
+
 ## 2026-11-02 - Phase 03: Celestial system
 
 Branch: `phase-03-celestial-system` (off main at `63a292b`). Merge status: see `git log` on main.
