@@ -64,7 +64,8 @@ environment calculateSunParams(environment env, float TIME_OF_DAY) {
   env.nightFactor = 1.0 - smoothstep(-0.25, 0.05, elevation);
   float twilight = clamp(1.0 - abs(elevation) / 0.30, 0.0, 1.0);
   twilight = twilight*twilight*(3.0 - 2.0*twilight);
-  float rising = smoothstep(0.05, -0.05, sin(t));
+  // (smoothstep needs edge0 < edge1 in GLSL, so the reversed ramp is written as 1 - smoothstep.)
+  float rising = 1.0 - smoothstep(-0.05, 0.05, sin(t));
   env.dawnFactor = twilight * rising;
   env.duskFactor = twilight * (1.0 - rising);
 

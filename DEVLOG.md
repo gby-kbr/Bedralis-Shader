@@ -1,8 +1,32 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 02: Sky color system
+
+Branch: `phase-02-sky-color-system` (off main at `023dcb1`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/sky.h`: new `skyDesaturate`, `overworldSkyZenith`, `overworldSkyHorizon`, `calculateSkyColor`.
+- `source/origin/configuration.h`: sky palette and strength macros.
+- `source/materials/Sky/vertex.sc`: now declares its uniforms and computes the sky color per vertex.
+- `source/common/uniforms/FogAndDistanceControl.json`: new uniform definition.
+- `source/origin/function/detection.h`: fixed reversed `smoothstep` edges from Phase 01.
+
+Problems found:
+- Phase 01 used `smoothstep(0.05, -0.05, x)`, undefined in GLSL when edge0 >= edge1. Fixed with `1.0 - smoothstep(-0.05, 0.05, x)`.
+- `Sky/vertex.sc` used `SkyColor` and `FogColor` without declaring them; the declarations are now explicit.
+- Sun glow pushed channels above 1.0 (max 1.084 in the preview); the result is now clamped.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Palette preview rendered with a Python port of the same math (sunrise, midday, sunset, night, rain day/night, Nether). The preview approximates the engine's own `SkyColor`/`FogColor` (darkened at night), so it is a palette check, not an in-game screenshot.
+- In-game test: NOT run.
+
+Assumptions still unverified: the sky dome is centered on the camera (world position used as view direction); `a_color0.x` is 0 at the zenith and 1 at the horizon; `sunDir` matches the rendered sun position (Phase 03 will check).
+Not done: thunderstorm sky (no thunder detection), End sky (Phase 10).
+
 ## 2026-11-02 - Phase 01: Core architecture & environment detection
 
-Branch: `phase-01-environment-detection` (off `origin/main` at `68745b2`). Merge status: NOT MERGED, awaiting review.
+Branch: `phase-01-environment-detection` (off `origin/main` at `68745b2`). Merge status: MERGED to main as `023dcb1`.
 
 Changes:
 - `source/origin/configuration.h`: added `PI`, `SUN_PATH_TILT/YAW`, `MOON_PATH_TILT/YAW`, `DIM_OVERWORLD/NETHER/END`.

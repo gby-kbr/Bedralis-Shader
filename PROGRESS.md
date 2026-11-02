@@ -4,8 +4,8 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 01 | Core architecture & environment detection | TESTING |
-| 02 | Sky color system | NOT STARTED |
+| 01 | Core architecture & environment detection | MERGED (not compiled / not tested in game) |
+| 02 | Sky color system | MERGED (not compiled / not tested in game) |
 | 03 | Celestial system | NOT STARTED |
 | 04 | Atmospheric system | NOT STARTED |
 | 05 | Lighting system | NOT STARTED |
@@ -16,9 +16,23 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
 
+## Phase 02 details
+
+Done:
+- `sky.h`: `calculateSkyColor()` with day / dawn / dusk / night palettes, rain overcast, dawn/dusk sun glow, Nether (engine fog color, darker and less saturated), horizon gradient, and a small share of the engine `SkyColor`/`FogColor` to keep biome fog tint.
+- `configuration.h`: palette and strength macros (`SKY_*`, `NETHER_*`).
+- `Sky/vertex.sc`: colors are computed per vertex through `calculateEnvironment()` + `calculateSkyColor()`; fragment stays pass-through.
+- `common/uniforms/FogAndDistanceControl.json`: new uniform definition.
+- Phase 01 fix: `smoothstep` had reversed edges (undefined in GLSL); now `1.0 - smoothstep(...)`.
+
+Not done / deferred:
+- Thunderstorm sky: needs thunder detection (still unverified data source).
+- End sky: `calculateSkyColor()` returns the engine color for the End; the real work is Phase 10 in the `EndSky` material.
+- Underwater sky is not handled (the sky is not visible underwater).
+
 ## Phase 01 details
 
-Done (on branch `phase-01-environment-detection`, not merged):
+Done (merged to main in `023dcb1`):
 - `configuration.h`: `PI`, sun/moon orbit macros, `DIM_*` dimension IDs.
 - `utility.h`: `degToRad`, `rotate2` (scalar rotation, no `mat2`, so it is portable across GLSL/HLSL/Metal).
 - `detection.h`: extended `environment` struct, `detectDimension`, smooth daylight/night/dawn/dusk weights, and `calculateEnvironment()` as the single entry point.
