@@ -1,5 +1,33 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 06: Water system
+
+Branch: `phase-06-water-system` (off main at `8e45b3e`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/wave.h`, `water.h`: new water normal and shading functions.
+- `source/origin/function/detection.h`: `orbitDirection`, `sunDirection`, `moonDirection` (refactor, same results as before).
+- `source/origin/function/fog.h`: underwater fog color through `underwaterFogColor()`.
+- `source/materials/RenderChunk/vertex.sc`, `varying.def.sc`, `fragment.sc`: water flag, rain factor, and `shadeWater()` call.
+- `source/origin/configuration.h`: water macros.
+
+Decisions:
+- Per the project owner: no reflection except sun/moon/sky (and clouds later). Screen-space reflection and object reflection were not attempted.
+- No new varying semantics were added; the water flag and rain factor reuse free components of existing varyings (a vec2 became a vec3, and `v_worldPosition.w` was unused).
+
+Problems found:
+- A first patch attempt for `detection.h` failed on a trailing-space mismatch and the script still printed "patched"; caught by checking `git status` and the macro count, then redone and verified.
+- A branch named `phase-06-water-system` already existed locally; it pointed at the same commit as main with no extra commits and was not on the remote, so it was reused.
+- Moon glint was almost invisible at night; strength raised from 0.35 to 0.60. It stays subtle at steep angles because fresnel is low there.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Python port of `waterNormal` and `shadeWater`, rendered as a water plane seen from 6 blocks up with the Phase 02 sky and Phase 04 fog (midday, sunset, night, rain): no out-of-range values; opacity 0.57 to 0.99; fresnel 0.03 to 0.98; max wave tilt 7.3 degrees (9.7 in rain); sun glint column visible at sunset; the sky/fog color match at the horizon was checked numerically (0.819, 0.626, 0.578 on both sides).
+- Preview is a Python approximation (assumed water texture color and engine fog range), not an in-game screenshot.
+- In-game test: NOT run.
+
+Assumptions still unverified: `ViewPositionAndTime.w` is time in seconds; water is the only TRANSPARENT block with vertex alpha below 0.95; `v_worldPos` in `RenderChunk` is the absolute world position; changing the varying `v_ditheringAndMaskTinting` to a vec3 is accepted by the material compiler.
+
 ## 2026-11-02 - Phase 05: Lighting system
 
 Branch: `phase-05-lighting-system` (off main at `35d9532`). Merge status: see `git log` on main.

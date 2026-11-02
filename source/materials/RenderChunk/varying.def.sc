@@ -9,7 +9,7 @@ vec4 i_data3 : TEXCOORD5;
 
 vec4          v_clipPosition            : COLOR1;
 vec4          v_color0                  : COLOR0;
-vec2          v_ditheringAndMaskTinting : TEXCOORD2;
+vec3          v_ditheringAndMaskTinting : TEXCOORD2;
 vec4          v_fog                     : COLOR2;
 vec2          v_lightmapUV              : TEXCOORD1;
 vec4          v_lightTint               : TEXCOORD4;

@@ -9,12 +9,28 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 03 | Celestial system | MERGED (not compiled / not tested in game) |
 | 04 | Atmospheric system | MERGED (not compiled / not tested in game) |
 | 05 | Lighting system | MERGED (not compiled / not tested in game) |
-| 06 | Water system | NOT STARTED |
+| 06 | Water system | MERGED (not compiled / not tested in game) |
 | 07 | Cloud system | NOT STARTED |
 | 08 | Weather system | NOT STARTED |
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 06 details
+
+Done:
+- `wave.h`: `waterNormal()`: animated per-pixel wave normal (3 waves + 2 rain ripple waves), 64-block periodic so the position can be wrapped (float precision), fades out with distance.
+- `water.h`: `gradeWaterColor()`, `underwaterFogColor()`, `shadeWater()` (fresnel opacity, analytic reflection of the sky gradient, sun and moon glints, rain ripples, sky exposure so caves get no reflection).
+- `RenderChunk`: water flagged in the vertex shader (`v_ditheringAndMaskTinting` is now a vec3, z = water; `v_worldPosition.w` carries the rain factor); the fragment shader calls `shadeWater()` after lighting and before fog.
+- `fog.h`: underwater fog color is slightly desaturated.
+- `detection.h`: `orbitDirection()`, `sunDirection()`, `moonDirection()` extracted so the fragment shader reuses the same sun/moon math (no duplicate); `calculateSunParams()` behaves the same.
+- `configuration.h`: `WATER_*` macros.
+
+Deliberately not done:
+- No screen-space reflection or reflection of terrain/objects: no usable depth/color buffer here and a wrong reflection looks worse than none. Only the sky, sun and moon are reflected.
+- No vertex wave displacement: it would open cracks at chunk borders and shores. Waves are normal-based only.
+- Cloud reflection: waits for Phase 07, when the clouds themselves are defined.
+- Thunder and splash particles: Phase 08.
 
 ## Phase 05 details
 

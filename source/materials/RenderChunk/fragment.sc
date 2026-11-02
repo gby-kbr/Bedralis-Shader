@@ -3,11 +3,14 @@ $input v_clipPosition, v_worldPosition, v_color0, v_ditheringAndMaskTinting, v_f
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/DitherUtil.dragonh>
 #include "origin/function/lighting.h"
+#include "origin/function/water.h"
 
 uniform vec4 FogColor;
 uniform vec4 DitherParams;
 uniform vec4 DitherParams2[3];
 uniform vec4 ViewPositionAndTime;
+uniform vec4 TimeOfDay;
+uniform vec4 MoonPhase;
 
 SAMPLER2D_AUTOREG(s_MatTexture);
 SAMPLER2D_AUTOREG(s_LightMapTexture);
@@ -68,6 +71,13 @@ void main() {
 #endif
 
     diffuse.rgb *= applyBedralisLight(texture2D(s_LightMapTexture, v_lightmapUV).rgb, v_lightmapUV, v_lightTint);
+
+#if defined(TRANSPARENT)
+    // Water: grading, fresnel opacity, animated waves and sky/sun/moon reflection.
+    if (v_ditheringAndMaskTinting.z > 0.5) {
+        diffuse = shadeWater(diffuse, v_worldPos, ViewPositionAndTime.xyz, ViewPositionAndTime.w, TimeOfDay.x, MoonPhase.x, v_fog.rgb, v_worldPosition.w, v_lightmapUV.y);
+    }
+#endif
     diffuse.rgb = mix(diffuse.rgb, v_fog.rgb, v_fog.a);
 
     gl_FragColor = diffuse;

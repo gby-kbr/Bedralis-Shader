@@ -81,9 +81,17 @@ void main() {
 #endif
 
     v_clipPosition = position;
-    v_worldPosition = vec4(worldPos, 1.0);
+    v_worldPosition = vec4(worldPos, env.rainFactor);   // w carries the rain factor for water shading
     v_color0 = color;
-    v_ditheringAndMaskTinting = ditheringAndMaskTinting;
+    // z = 1 for water. Water is the only block with a translucent vertex alpha
+    // (the engine uses the same test above for its distance fade).
+    float isWater = 0.0;
+#if defined(TRANSPARENT)
+    if (a_color0.a < 0.95 && !env.underwater && !env.isNether && !env.isEnd) {
+        isWater = 1.0;
+    }
+#endif
+    v_ditheringAndMaskTinting = vec3(ditheringAndMaskTinting, isWater);
     v_fog = fog;
     v_lightmapUV = lightmapUV;
     // Light color (xyz) and block light warmth (w); the fragment shader applies them to the engine lightmap.

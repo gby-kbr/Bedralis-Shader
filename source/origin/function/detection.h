@@ -42,20 +42,29 @@ float detectDimension(float dimensionId) {
   return floor(dimensionId + 0.5);
 }
 
+// Direction of a body on its orbit. angle = 2*PI*TimeOfDay (+PI for the moon).
+// Shared by calculateSunParams() and by shaders that only need the direction.
+vec3 orbitDirection(float angle, float tilt, float yaw) {
+  vec3 d = vec3(sin(angle), cos(angle), 0.0);
+  d.yz = rotate2(d.yz, -degToRad(tilt));
+  d.xz = rotate2(d.xz, degToRad(yaw));
+  return d;
+}
+
+vec3 sunDirection(float timeOfDay) {
+  return orbitDirection(2.0 * PI * timeOfDay, SUN_PATH_TILT, SUN_PATH_YAW);
+}
+
+vec3 moonDirection(float timeOfDay) {
+  return orbitDirection(2.0 * PI * timeOfDay + PI, MOON_PATH_TILT, MOON_PATH_YAW);
+}
+
 environment calculateSunParams(environment env, float TIME_OF_DAY) {
   float t = 2.0 * PI * TIME_OF_DAY;
-  vec3 sunDir = vec3(sin(t), cos(t), 0.0);
-  vec3 moonDir = vec3(-sunDir.x, -sunDir.y, 0.0);
-  env.dayFactor = sunDir.y;
+  env.dayFactor = cos(t);   // sun elevation before orbit tilt/yaw
 
-  sunDir.yz = rotate2(sunDir.yz, -degToRad(SUN_PATH_TILT));
-  sunDir.xz = rotate2(sunDir.xz, degToRad(SUN_PATH_YAW));
-
-  moonDir.yz = rotate2(moonDir.yz, -degToRad(MOON_PATH_TILT));
-  moonDir.xz = rotate2(moonDir.xz, degToRad(MOON_PATH_YAW));
-
-  env.sunDir = sunDir;
-  env.moonDir = moonDir;
+  env.sunDir = sunDirection(TIME_OF_DAY);
+  env.moonDir = moonDirection(TIME_OF_DAY);
 
   // Smooth day/night/twilight weights derived from the sun elevation.
   // The sun is rising while elevation increases, which is when sin(t) < 0.

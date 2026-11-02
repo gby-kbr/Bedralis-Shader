@@ -5,6 +5,7 @@
 #include "origin/function/utility.h"
 #include "origin/function/detection.h"
 #include "origin/function/sky.h"
+#include "origin/function/water.h"
 
 // Fog is computed in the vertex shaders and passed on as v_fog = (color, intensity).
 // The color matches the sky horizon (Phase 02) so terrain fades into the sky,
@@ -18,8 +19,11 @@ float combineFog(float a, float b) {
 // Fog color for a vertex.
 //   viewDir : normalized direction from the camera to the vertex
 vec3 atmosphericFogColor(environment env, vec3 viewDir, vec3 vanillaSky, vec3 vanillaFog) {
-  // Underwater fog is the water color and The End keeps its own fog.
-  if (env.underwater || env.isEnd) {
+  // Underwater keeps the engine water fog (slightly desaturated); The End keeps its own fog.
+  if (env.underwater) {
+    return underwaterFogColor(vanillaFog);
+  }
+  if (env.isEnd) {
     return vanillaFog;
   }
   // Same function as the sky at the horizon (t = 1), so sky and fog match.
