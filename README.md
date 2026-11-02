@@ -1,2 +1,2 @@
-# Origin-Shader
+# Bedralis-Shader
 Base Shader Bedrock
