@@ -6,7 +6,7 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 |-------|------|--------|
 | 01 | Core architecture & environment detection | MERGED (not compiled / not tested in game) |
 | 02 | Sky color system | MERGED (not compiled / not tested in game) |
-| 03 | Celestial system | NOT STARTED |
+| 03 | Celestial system | MERGED (not compiled / not tested in game) |
 | 04 | Atmospheric system | NOT STARTED |
 | 05 | Lighting system | NOT STARTED |
 | 06 | Water system | NOT STARTED |
@@ -15,6 +15,20 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 03 details
+
+Done:
+- `celestial.h`: `sunDiscTint`, `moonDiscTint`, `celestialBodyTint`, `moonlightFromPhase`, `starVisibility`.
+- `SunMoon` vertex/fragment: sun tinted warm near the horizon and white when high, moon tinted cool, both dimmed in rain.
+- `Stars` vertex: star alpha scaled by night visibility, fading out in rain.
+- `configuration.h`: `SUN_TINT_*`, `MOON_TINT`, `*_RAIN_DIM`, `STAR_RAIN_FADE`, `MOON_NEW_LIGHT`.
+
+Not done / deferred:
+- The engine places the sun/moon quads and chooses the moon phase cell, so the shader cannot move them or redraw phases; only color and brightness are controlled.
+- `moonlightFromPhase()` is ready but not used yet (night lighting is Phase 05).
+- Star twinkle: no verified total-time uniform (`ElapsedFrameTime` looks like a frame delta), so it was not added.
+- Extra sun glow disc: the dawn/dusk glow already lives in the sky (Phase 02); a separate halo would need extra geometry.
 
 ## Phase 02 details
 

@@ -39,4 +39,13 @@
 #define NETHER_SKY_DARKEN 0.90
 #define NETHER_SKY_DESATURATE 0.20
 
+// ---- Celestial bodies (Phase 03) ----
+#define SUN_TINT_LOW   vec3(1.00, 0.62, 0.38)   // sun near the horizon
+#define SUN_TINT_HIGH  vec3(1.00, 0.96, 0.88)   // sun high in the sky
+#define MOON_TINT      vec3(0.80, 0.86, 0.95)
+#define SUN_RAIN_DIM   0.60   // how much the sun disc is dimmed at full rain
+#define MOON_RAIN_DIM  0.70
+#define STAR_RAIN_FADE 0.90   // how much stars fade at full rain
+#define MOON_NEW_LIGHT 0.25   // moonlight strength at new moon (full moon = 1.0)
+
 #endif

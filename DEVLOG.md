@@ -1,5 +1,25 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 03: Celestial system
+
+Branch: `phase-03-celestial-system` (off main at `63a292b`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/celestial.h`: new sun/moon tint, moonlight-from-phase and star visibility functions.
+- `source/origin/configuration.h`: celestial macros.
+- `source/materials/SunMoon/vertex.sc` and `fragment.sc`: per-body tint computed in the vertex shader and applied in the fragment shader.
+- `source/materials/Stars/vertex.sc`: star alpha scaled by night visibility.
+
+Problems found:
+- Sun and moon share one material, so the body must be identified. The vertex direction is compared with the computed `sunDir` (smooth transition, no hard switch). This relies on `sunDir` matching the engine's sun position, which is still unverified.
+- No verified total-time uniform for star twinkle, so twinkle was skipped.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Python port of the math: 960 time/rain samples, no value out of range; stars are 0 at noon and dusk, 1 at midnight, 0.1 at midnight in full rain; moonlight by phase 1.00 (full) to 0.25 (new).
+- Timeline preview rendered (sun/moon tint and star visibility, clear and rain). Not an in-game screenshot.
+- In-game test: NOT run.
+
 ## 2026-11-02 - Phase 02: Sky color system
 
 Branch: `phase-02-sky-color-system` (off main at `023dcb1`). Merge status: see `git log` on main.
