@@ -1,5 +1,21 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 06 refinement: clearer water and richer waves
+
+Branch: `water-clarity-and-waves` (off main at `b02bdb7`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/wave.h`: rewritten with swell, medium (domain-warped) and detail layers, per-layer distance fade, rain ripples, and `waterWaveHeight()` for optional vertex waves.
+- `source/origin/configuration.h`: clearer water defaults, new fade distances, `WATER_VERTEX_WAVES` (0) and `WATER_VERTEX_WAVE_SCALE`.
+- `source/materials/RenderChunk/vertex.sc`: optional vertex wave block, compiled out by default.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Python port rendered on the same scenes as before: opacity range 0.57-0.99 became 0.41-0.88; max wave tilt 6.6 degrees clear and 8.4 in rain; no out-of-range values.
+- The preview assumes a dark seabed, so it cannot judge real clarity; the engine's lit seabed will show through in game.
+- Vertex waves: not tested (default off).
+- In-game test: NOT run.
+
 ## 2026-11-02 - Phase 06: Water system
 
 Branch: `phase-06-water-system` (off main at `8e45b3e`). Merge status: see `git log` on main.

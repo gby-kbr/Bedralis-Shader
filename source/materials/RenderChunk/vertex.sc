@@ -40,6 +40,15 @@ void main() {
     color = a_color0;
 #endif
 
+#if WATER_VERTEX_WAVES && defined(TRANSPARENT)
+    // Experimental (off by default): lift or lower the top water vertices with the swell.
+    // The offset only depends on world xz and time, so neighboring water vertices move
+    // together; fract(y) > 0.5 limits it to surface vertices.
+    if (a_color0.a < 0.95 && fract(worldPos.y) > 0.5 && !detectUnderwater(FogColor.rgb, FogAndDistanceControl.xy)) {
+        worldPos.y += waterWaveHeight(worldPos.xz, ViewPositionAndTime.w);
+    }
+#endif
+
     vec4 fogAndDist = FogAndDistanceControl;
     if (MeshContext.x > 0.5) {
         fogAndDist = vec4(0.99, 1.0, 100000.0, 100000.0);

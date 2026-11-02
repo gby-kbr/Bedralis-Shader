@@ -4,6 +4,7 @@ Last phase: 06 - Water system (merged to main; not compiled, not tested in game)
 Last work: water shading in `water.h` / `wave.h` (fresnel, animated normals, sky/sun/moon reflection, rain ripples), wired into the `RenderChunk` fragment shader.
 
 Unfinished:
+- Try `WATER_VERTEX_WAVES = 1` in game and check shores and chunk borders for gaps; tune `WATER_ALPHA_SCALE` (clarity) while looking at real seabeds.
 - Cloud reflection on water (do it once clouds exist, Phase 07).
 - Shadow integration and true N.L lighting (no shadow map or terrain normals).
 - Thunder fog/lighting (needs thunder detection).

@@ -69,19 +69,30 @@
 #define LIGHT_NEWMOON_DIM  0.12   // night sky light dimming at new moon (full moon = none)
 
 // ---- Water (Phase 06) ----
-#define WATER_SATURATION       0.80   // 1.0 keeps the engine water color, lower = more neutral
+#define WATER_SATURATION       0.85   // 1.0 keeps the engine water color, lower = more neutral
 #define WATER_TINT             vec3(0.16, 0.30, 0.36)
-#define WATER_TINT_MIX         0.20
-#define WATER_ALPHA_SCALE      0.85   // < 1 makes water clearer when looking straight down
-#define WATER_FRESNEL_ALPHA    0.45   // extra opacity at grazing angles
+#define WATER_TINT_MIX         0.12
+#define WATER_ALPHA_SCALE      0.60   // < 1 makes water clearer (the engine alpha is scaled by this)
+#define WATER_FRESNEL_ALPHA    0.50   // extra opacity at grazing angles
 #define WATER_F0               0.03   // base reflectivity of water
 #define WATER_REFLECT_STRENGTH 0.90
 #define WATER_SKY_ZENITH_RATIO vec3(0.60, 0.72, 0.95)   // zenith color relative to the horizon color
 #define WATER_SUN_STRENGTH     1.60
 #define WATER_MOON_STRENGTH    0.60
 #define WATER_WAVE_STRENGTH    1.0    // multiplier for wave slope
-#define WATER_WAVE_FADE_START  24.0   // waves fade out with distance to avoid shimmer
+#define WATER_SWELL_FADE_START  60.0   // each wave layer fades out with distance to avoid shimmer
+#define WATER_SWELL_FADE_END   220.0
+#define WATER_WAVE_FADE_START  24.0
 #define WATER_WAVE_FADE_END    90.0
+#define WATER_DETAIL_FADE_START 12.0
+#define WATER_DETAIL_FADE_END  50.0
+
+// Experimental: move the water surface vertices with the swell (see RenderChunk vertex).
+// Off by default because it cannot be tested without the game: it may show gaps along
+// shores or chunk borders. Set WATER_VERTEX_WAVES to 1 to try it; WATER_VERTEX_WAVE_SCALE
+// scales the height (max 0.085 blocks at 1.0).
+#define WATER_VERTEX_WAVES 0
+#define WATER_VERTEX_WAVE_SCALE 1.0
 #define WATER_RAIN_RIPPLE      0.12   // extra small ripples at full rain
 #define WATER_UNDERWATER_DESAT 0.25   // underwater fog color desaturation
 

@@ -32,6 +32,13 @@ Deliberately not done:
 - Cloud reflection: waits for Phase 07, when the clouds themselves are defined.
 - Thunder and splash particles: Phase 08.
 
+### Phase 06 refinement: clearer water and richer waves (merged)
+
+- `wave.h`: three wave layers (swell, medium with domain warp, fine detail), each fading out with distance at its own pace, plus rain ripples.
+- Clearer water: `WATER_ALPHA_SCALE` 0.85 to 0.60, less tint (`WATER_TINT_MIX` 0.12), more of the engine color kept (`WATER_SATURATION` 0.85).
+- Optional vertex waves (`WATER_VERTEX_WAVES`, default 0): the water surface follows the swell. Off because it cannot be tested without the game and may show gaps along shores or chunk borders.
+- Not possible in this pipeline (no depth buffer, no scene color, no extra passes): depth-based water color and transparency, refraction, shore foam, caustics, reflection of terrain and objects.
+
 ## Phase 05 details
 
 Done:
