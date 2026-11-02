@@ -1,5 +1,28 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-02 - Phase 05: Lighting system
+
+Branch: `phase-05-lighting-system` (off main at `35d9532`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/lighting.h`: new `skyLightTint`, `blockLightWarmth`, `applyBedralisLight`.
+- `source/origin/configuration.h`: lighting macros.
+- `source/materials/RenderChunk/vertex.sc`, `varying.def.sc`, `fragment.sc`: new `v_lightTint` varying (TEXCOORD4); fragment applies it to the engine lightmap.
+- `source/materials/Actor/vertex.sc`: sky light tint applied to `v_light`.
+
+Problems found:
+- Replacing the engine lightmap would risk breaking the Nether, The End, underwater and night vision, and nothing can be tested here, so the tint is applied on top of the lightmap instead.
+- Terrain has no normals, so sun N.L lighting is not possible without per-pixel derivatives; the engine's baked face shading is kept.
+- New moon dimming of 0.20 stacked on the engine's dark night lightmap looked too dark; lowered to 0.12.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler or GLSL validator available).
+- Python port of the math (480 time samples x clear/rain): no value outside 0..1, channels between 0.60 and 1.00. Noon clear tint (1.00, 0.98, 0.95); noon rain (0.87, 0.86, 0.85); night full moon (0.78, 0.86, 1.00); torch warmth stronger at night than at noon.
+- Preview rendered (sky light and torch-lit tint across the day). It shows the multiplier only, not final pixels, since the engine lightmap is the other factor.
+- In-game test: NOT run.
+
+Assumptions still unverified: `v_lightmapUV` is (block light, sky light); `MoonPhase.x` runs 0..7 with 0 = full moon; the engine lightmap is the dominant brightness term so the tint does not over-darken it.
+
 ## 2026-11-02 - Phase 04: Atmospheric system
 
 Branch: `phase-04-atmospheric-system` (off main at `129e1af`). Merge status: see `git log` on main.

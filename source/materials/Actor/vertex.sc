@@ -10,6 +10,7 @@ $output v_clipPosition, v_color0, v_fog, v_light, v_texcoord0, v_worldPos
 #include <MinecraftRenderer.Materials/FogUtil.dragonh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
 #include "origin/function/fog.h"
+#include "origin/function/lighting.h"
 
 uniform vec4 OverlayColor;
 uniform vec4 TileLightColor;
@@ -19,6 +20,7 @@ uniform vec4 SkyColor;
 uniform vec4 TimeOfDay;
 uniform vec4 DimensionID;
 uniform vec4 RenderDistance;
+uniform vec4 MoonPhase;
 uniform vec4 UVAnimation;
 uniform mat4 Bones[8];
 
@@ -68,7 +70,8 @@ void main() {
 
     v_clipPosition = position;
     v_fog = fog;
-    v_light = light;
+    // Same sky light tint as terrain; entities keep the engine's own face shading.
+    v_light = vec4(light.rgb * skyLightTint(env, MoonPhase.x), light.a);
     v_worldPos = worldPosition;
     gl_Position = position;
 }

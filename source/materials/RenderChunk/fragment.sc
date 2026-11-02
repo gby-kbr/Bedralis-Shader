@@ -1,7 +1,8 @@
-$input v_clipPosition, v_worldPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV, v_texcoord0, v_worldPos
+$input v_clipPosition, v_worldPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV, v_lightTint, v_texcoord0, v_worldPos
 
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/DitherUtil.dragonh>
+#include "origin/function/lighting.h"
 
 uniform vec4 FogColor;
 uniform vec4 DitherParams;
@@ -66,7 +67,7 @@ void main() {
     }
 #endif
 
-    diffuse.rgb *= texture2D(s_LightMapTexture, v_lightmapUV).rgb;
+    diffuse.rgb *= applyBedralisLight(texture2D(s_LightMapTexture, v_lightmapUV).rgb, v_lightmapUV, v_lightTint);
     diffuse.rgb = mix(diffuse.rgb, v_fog.rgb, v_fog.a);
 
     gl_FragColor = diffuse;

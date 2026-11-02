@@ -55,4 +55,17 @@
 #define HORIZON_FOG_STRENGTH 0.20   // extra fog when looking along the horizon at far distance
 #define RAIN_FOG_STRENGTH    0.55   // extra fog at full rain
 
+// ---- Lighting (Phase 05) ----
+// The engine lightmap stays the base; these tints are multiplied on top of it.
+#define LIGHT_DAY_TINT    vec3(1.00, 0.98, 0.95)
+#define LIGHT_DAWN_TINT   vec3(1.00, 0.82, 0.66)
+#define LIGHT_DUSK_TINT   vec3(1.00, 0.78, 0.62)
+#define LIGHT_NIGHT_TINT  vec3(0.78, 0.86, 1.00)
+#define LIGHT_BLOCK_TINT  vec3(1.00, 0.82, 0.58)   // torch / block light
+#define LIGHT_BLOCK_WARMTH_DAY   0.15   // how strongly block light is tinted warm in daylight
+#define LIGHT_BLOCK_WARMTH_NIGHT 0.60   // ... and at night
+#define LIGHT_RAIN_DESAT   0.50   // sky light desaturation at full rain
+#define LIGHT_RAIN_DIM     0.12   // sky light dimming at full rain
+#define LIGHT_NEWMOON_DIM  0.12   // night sky light dimming at new moon (full moon = none)
+
 #endif

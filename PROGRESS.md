@@ -8,13 +8,28 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 02 | Sky color system | MERGED (not compiled / not tested in game) |
 | 03 | Celestial system | MERGED (not compiled / not tested in game) |
 | 04 | Atmospheric system | MERGED (not compiled / not tested in game) |
-| 05 | Lighting system | NOT STARTED |
+| 05 | Lighting system | MERGED (not compiled / not tested in game) |
 | 06 | Water system | NOT STARTED |
 | 07 | Cloud system | NOT STARTED |
 | 08 | Weather system | NOT STARTED |
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 05 details
+
+Done:
+- `lighting.h`: `skyLightTint()` (time of day, dawn/dusk, night, moon phase, rain), `blockLightWarmth()`, `applyBedralisLight()`.
+- Design: the engine lightmap stays the base and the Bedralis light color is multiplied on top, so brightness levels, night vision, the Nether, The End and underwater keep working (the tint is neutral there).
+- `RenderChunk`: new varying `v_lightTint` (sky tint + block warmth) computed in the vertex shader; the fragment multiplies the sampled lightmap with it. Block light (torches) gets a warm tint, stronger at night.
+- `Actor`: `v_light` is multiplied by the same sky light tint.
+- `configuration.h`: `LIGHT_*` macros.
+
+Not done / deferred:
+- Shadow integration: there is no shadow map in this pipeline, so there is nothing to integrate yet.
+- True N.L sun lighting: terrain has no normals; face shading baked by the engine is kept (actors already have it). Revisit in Phase 09/11 if a derivative-based normal is affordable on mobile.
+- `Actor` has no block-light value, so entities only get the sky tint.
+- Thunder lighting: needs thunder detection.
 
 ## Phase 04 details
 

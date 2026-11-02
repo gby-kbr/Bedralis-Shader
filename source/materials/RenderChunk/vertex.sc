@@ -3,11 +3,12 @@ $input a_color0, a_position, a_texcoord0, a_texcoord1
     $input i_data1, i_data2, i_data3
 #endif
 
-$output v_clipPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV, v_texcoord0, v_worldPos, v_worldPosition
+$output v_clipPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV, v_lightTint, v_texcoord0, v_worldPos, v_worldPosition
 
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
 #include "origin/function/fog.h"
+#include "origin/function/lighting.h"
 
 uniform vec4 RenderChunkFogAlpha;
 uniform vec4 FogAndDistanceControl;
@@ -18,6 +19,7 @@ uniform vec4 SkyColor;
 uniform vec4 TimeOfDay;
 uniform vec4 DimensionID;
 uniform vec4 RenderDistance;
+uniform vec4 MoonPhase;
 
 void main() {
 #ifdef INSTANCING
@@ -84,6 +86,8 @@ void main() {
     v_ditheringAndMaskTinting = ditheringAndMaskTinting;
     v_fog = fog;
     v_lightmapUV = lightmapUV;
+    // Light color (xyz) and block light warmth (w); the fragment shader applies them to the engine lightmap.
+    v_lightTint = vec4(skyLightTint(env, MoonPhase.x), blockLightWarmth(env));
     v_texcoord0 = uv0;
     v_worldPos = worldPos;
     gl_Position = position;
