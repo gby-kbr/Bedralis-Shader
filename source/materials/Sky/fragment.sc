@@ -6,6 +6,7 @@
 
 #ifndef INSTANCING
 #include "origin/function/sky.h"
+#include "origin/function/tonemap.h"
 
 uniform vec4 TimeOfDay;
 uniform vec4 FogColor;
@@ -14,8 +15,7 @@ uniform vec4 FogAndDistanceControl;
 
 void main() {
 #ifndef INSTANCING
-    vec3 viewDir = -normalize(v_worldPos);
-    viewDir.y = -viewDir.y;
+    vec3 viewDir = normalize(v_worldPos);
 
     environment env;
     env.underwater = detectUnderwater(FogColor.rgb, FogAndDistanceControl.xy);
@@ -26,7 +26,10 @@ void main() {
 
     skycolor skycol = overworldSkyColors(env);
 
-    gl_FragColor = vec4(renderOverworldSky(skycol, env, viewDir, true), 1.0);
+    vec3 skyColor = renderSky(skycol, env, -viewDir, true);
+    skyColor = colorCorrection(skyColor);
+
+    gl_FragColor = vec4(skyColor, 1.0);
 #else
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
