@@ -7,7 +7,10 @@ $output v_color0, v_texcoord0, v_worldPos
 
 #include <bgfx_shader.sh>
 
+#include "origin/configuration.h"
+
 uniform mat4 UV0Transform;
+uniform vec4 ViewPositionAndTime;
 
 void main() {
     vec3 worldPosition;
@@ -18,7 +21,9 @@ void main() {
     worldPosition = mul(u_model[0], vec4(a_position, 1.0)).xyz;
 #endif
 
-    v_color0 = a_color0;
+    // v_color0 is unused by the fragment shader, so it carries (cos, sin) of the sky rotation.
+    float angle = ViewPositionAndTime.w * END_SKY_ROTATION;
+    v_color0 = vec4(cos(angle), sin(angle), 0.0, 0.0);
     v_texcoord0 = mul(UV0Transform, vec4(a_texcoord0, 0.0, 1.0)).xy;
     v_worldPos = worldPosition;
     gl_Position = mul(u_viewProj, vec4(worldPosition, 1.0));

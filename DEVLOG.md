@@ -1,5 +1,25 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 10: The End outer-space sky
+
+Branch: `phase-10-end-sky` (off main at `c9ffcae`). Merge status: see `git log` on main.
+
+Changes:
+- New: `scripts/generate_end_sky_texture.py`, `assets/textures/environment/EndSkyTexture.png`, `source/origin/function/endsky.h`, `source/materials/EndSky/buffers/endskytexture.json`.
+- Changed: `EndSky` vertex and fragment, `configuration.h` (`END_SKY_*`).
+
+Decisions:
+- The texture is generated, not downloaded (no network access to image sources, and no licensing question). 2048x1024 was chosen so stars stay small; a smaller texture would blur them on a phone screen. It is 8 MB in GPU memory uncompressed, which Phase 11 should weigh.
+- First texture had far too many, too large stars (a wall of blobs). Reduced the star probabilities about tenfold and the star size, and lowered the band brightness; the second version looks like a real sky.
+- The material uses the box direction like newb-aerotion's EndSky does.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler available).
+- Python port of the lookup: generator pixel direction to shader UV round trip error 0.0 pixels on 2000 random pixels; seam across u = 0/1 shows no jump (max adjacent step 0.006); rotation keeps unit length; output after the tonemap stays within 0.005..0.78. Rendered 4 views (band, up, horizon, opposite side).
+- Preview is a Python approximation, not a Minecraft screenshot. In-game test: NOT run.
+
+Assumptions still unverified: the End sky box is centered on the camera so `v_worldPos` is a view direction; `atan2` and `acos` compile on all backends; the buffer slot 9 in `EndSky` does not collide; the sky looks right next to the End fog color.
+
 ## 2026-11-03 - Tonemap: Uchimura
 
 Branch: `tonemap-uchimura` (off main at `1352b44`). Merge status: see `git log` on main.
