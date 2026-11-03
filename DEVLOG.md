@@ -1,21 +1,12 @@
 # Bedralis Shader - Development Log
 
-## 2026-11-03 - Tonemap: pure Uchimura, no macros
-
-Branch: `tonemap-pure-uchimura` (off main at `6c5d529`). Merge status: see `git log` on main.
-
-Requested by the project owner: take the Uchimura tonemap straight from their file, with no extra settings or defines (there is only one tonemap, so no type switch).
-- `tonemap.h`: `uchimura()` and `colorCorrection()` copied from the provided file with the constants inline; `bedralisGrade()` renamed to `colorCorrection()` everywhere.
-- Removed `GRADE_*` and `UCHIMURA_*` from `configuration.h`, including my own exposure and saturation steps and the gamma-free choice noted before (the file's gamma, exposure and saturation macros are not part of the tonemap and are not used).
-- Not compiled, not tested in game.
-
 ## 2026-11-03 - Tonemap: Uchimura
 
 Branch: `tonemap-uchimura` (off main at `1352b44`). Merge status: see `git log` on main.
 
 Requested by the project owner: use the Uchimura tonemap from their tonemap.h. Follow-up: no settings at all, only the original values (exposure, saturation and the `GRADE_*` / `UCHIMURA_*` macros were removed).
-- `tonemap.h`: the grade now runs the Uchimura curve (P 1.0, a 1.0, m 0.22, l 0.4, c 1.33, b 0.0, as in the provided file), then saturation. Replaces my earlier contrast + shoulder. The gamma step of that file is not used, since this pipeline already works in display values.
-- `configuration.h`: `GRADE_CONTRAST`/`GRADE_SHOULDER` replaced by `UCHIMURA_*`.
+- `tonemap.h`: `uchimura()` and `colorCorrection()` taken from the provided file with the constants inline (P 1.0, a 1.0, m 0.22, l 0.4, c 1.33, b 0.0). No macros, no exposure, saturation or gamma; `bedralisGrade()` was renamed to `colorCorrection()` in all four fragments.
+- `configuration.h`: no tonemap settings (`GRADE_*` and `UCHIMURA_*` were first added, then removed on request).
 - Checked in Python: monotonic on 0..3, maximum 0.998, no jumps; 0.05 gives 0.033, 0.22 gives 0.22, 0.5 gives 0.5, 1.0 gives 0.83. So shadows get deeper and highlights a little dimmer than before. Not compiled, not tested in game.
 
 ## 2026-11-03 - Phase 09: Advanced visual effects
@@ -23,9 +14,9 @@ Requested by the project owner: use the Uchimura tonemap from their tonemap.h. F
 Branch: `phase-09-advanced-effects` (off main at `438ebfb`). Merge status: see `git log` on main.
 
 Changes:
-- `tonemap.h` (was empty): `bedralisGrade()`; `godrays.h` (was a stub): `applySunGlow()`.
+- `tonemap.h` (was empty): the tonemap (now `colorCorrection()`, see the entry above); `godrays.h` (was a stub): `applySunGlow()`.
 - `Sky`, `RenderChunk`, `Actor`, `Weather` fragments call the grade; `Sky` also calls the sun glow.
-- `configuration.h`: `GRADE_*`, `SUN_*`.
+- `configuration.h`: `SUN_*`.
 
 Decisions:
 - Only effects that work without a depth or color buffer; the rest is listed as not possible in PROGRESS.md.

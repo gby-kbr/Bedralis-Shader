@@ -1,7 +1,7 @@
 # Next Task
 
 Last phase: 09 - Advanced effects (grade + sun glow/shafts); before that 08 - Weather (merged to main; not compiled, not tested in game).
-Last work: `bedralisGrade()` in four fragments, `applySunGlow()` in the Sky fragment, Aerotion `weather.png` and `particles.png` added.
+Last work: `colorCorrection()` (pure Uchimura) in four fragments, `applySunGlow()` in the Sky fragment, Aerotion `weather.png` and `particles.png` added.
 
 Unfinished:
 - Try `WATER_VERTEX_WAVES = 1` in game and check shores and chunk borders for gaps; tune `WATER_ALPHA_SCALE` (clarity) while looking at real seabeds.
