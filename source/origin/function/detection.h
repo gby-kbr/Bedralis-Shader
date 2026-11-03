@@ -44,6 +44,15 @@ float detectDimension(float dimensionId) {
 
 // Direction of a body on its orbit. angle = 2*PI*TimeOfDay (+PI for the moon).
 // Shared by calculateSunParams() and by shaders that only need the direction.
+// Variant that takes sin(angle) and cos(angle), so callers that already have them do not pay
+// for more trigonometry.
+vec3 orbitDirectionSC(float sinA, float cosA, float tilt, float yaw) {
+  vec3 d = vec3(sinA, cosA, 0.0);
+  d.yz = rotate2(d.yz, -degToRad(tilt));
+  d.xz = rotate2(d.xz, degToRad(yaw));
+  return d;
+}
+
 vec3 orbitDirection(float angle, float tilt, float yaw) {
   vec3 d = vec3(sin(angle), cos(angle), 0.0);
   d.yz = rotate2(d.yz, -degToRad(tilt));
@@ -61,10 +70,13 @@ vec3 moonDirection(float timeOfDay) {
 
 environment calculateSunParams(environment env, float TIME_OF_DAY) {
   float t = 2.0 * PI * TIME_OF_DAY;
-  env.dayFactor = cos(t);   // sun elevation before orbit tilt/yaw
+  float sinT = sin(t);
+  float cosT = cos(t);
+  env.dayFactor = cosT;   // sun elevation before orbit tilt/yaw
 
-  env.sunDir = sunDirection(TIME_OF_DAY);
-  env.moonDir = moonDirection(TIME_OF_DAY);
+  // The moon is half an orbit behind the sun: sin(t + PI) = -sin(t), cos(t + PI) = -cos(t).
+  env.sunDir = orbitDirectionSC(sinT, cosT, SUN_PATH_TILT, SUN_PATH_YAW);
+  env.moonDir = orbitDirectionSC(-sinT, -cosT, MOON_PATH_TILT, MOON_PATH_YAW);
 
   // Smooth day/night/twilight weights derived from the sun elevation.
   // The sun is rising while elevation increases, which is when sin(t) < 0.
@@ -74,7 +86,7 @@ environment calculateSunParams(environment env, float TIME_OF_DAY) {
   float twilight = clamp(1.0 - abs(elevation) / 0.30, 0.0, 1.0);
   twilight = twilight*twilight*(3.0 - 2.0*twilight);
   // (smoothstep needs edge0 < edge1 in GLSL, so the reversed ramp is written as 1 - smoothstep.)
-  float rising = 1.0 - smoothstep(-0.05, 0.05, sin(t));
+  float rising = 1.0 - smoothstep(-0.05, 0.05, sinT);
   env.dawnFactor = twilight * rising;
   env.duskFactor = twilight * (1.0 - rising);
 

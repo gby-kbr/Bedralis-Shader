@@ -14,7 +14,7 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 08 | Weather system | MERGED (not compiled / not tested in game) |
 | 09 | Advanced visual effects | MERGED (not compiled / not tested in game) |
 | 10 | Realistic The End outer space sky | MERGED (not compiled / not tested in game) |
-| 11 | Final optimization & quality control | NOT STARTED |
+| 11 | Final optimization & quality control | MERGED (static audit only; not compiled / not tested in game) |
 
 ## Phase 10 details
 

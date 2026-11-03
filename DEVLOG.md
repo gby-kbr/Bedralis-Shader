@@ -1,5 +1,20 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Phase 11: Final optimization and QC
+
+Branch: `phase-11-final-qc` (off `main` at `86fda94`). Merge status: MERGED to main (fast-forward).
+
+Audit results:
+- `calculateEnvironment()` (runs per vertex in `RenderChunk`, also in the other vertex shaders): it only uses uniforms and a few `smoothstep`s. The sun/moon part used 6 trig calls (`sin`/`cos` for the sun, again for the moon, plus `cos(t)` and `sin(t)`). Now `sin(t)`/`cos(t)` are computed once and the moon uses their negation (the moon is half an orbit behind the sun): 2 trig calls. Behaviour unchanged. Added `orbitDirectionSC()`; `orbitDirection()` is still used by the water shader helpers.
+- Texture reads per pixel: Sky up to 4 (cirrus 3 + shafts 1, all `texture2DLod`), EndSky 1, RenderChunk 3 on water, Weather 3 (engine textures). No loops in any shader (`for` count 0).
+- EndSky texture: 2048x1024 RGB, about 1.1 MB on disk, about 8 MB in GPU memory (no mipmaps, bilinear). Kept; halving the size would visibly soften the stars and the black hole.
+- Unused code: removed empty `noise.h` (included nowhere). Macro audit: only `DIM_OVERWORLD` is not referenced (kept as documentation of the dimension ids) and the include guard.
+- Static checks (script, not a compiler): braces/parentheses balanced in every `.sc`/`.h`, every `#include` of a repo header resolves (engine `MinecraftRenderer.Materials/*.dragonh` includes are provided by the game), every `texture_path` in `buffers/*.json` has a file in `assets/`, every `buffers/*.json` parses. `material.json` files are pointers to `../../common/material.json` (template), not JSON.
+- Mobile precision: no `precision` qualifiers are written; buffers use `lowp` textures as in Newb. No dynamic loops, no `pow` in hot loops beyond the sky/fog math.
+
+Build / test: NOT compiled, NOT tested in game. The material build tooling referenced by `project.json` is missing in this repo.
+Preview: none (no code visual change).
+
 ## 2026-11-04 - Phase 10 follow-up 4: soft bloom edge, no horizon billows
 
 Branch: `end-sky-soft-bloom-clouds` (off `main` at `83a6a2f`). Merge status: MERGED to main (fast-forward).
