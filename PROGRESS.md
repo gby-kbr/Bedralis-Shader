@@ -26,6 +26,11 @@ Done:
 - `configuration.h`: `WEATHER_*` macros.
 - Rain already affects the sky (Phase 02), fog (Phase 04), light (Phase 05), water ripples (Phase 06) and cirrus fade (Phase 07) through `rainFactor`.
 
+Weather textures and particles (follow-up, merged):
+- `assets/textures/environment/weather.png`: the rain/snow sprite sheet from newb-aerotion (same author), used as is.
+- `assets/particles/rain_splash.json` and `rain_ripple.json`: same splash + expanding ripple effect as Aerotion, renamed to `bedralis:rain_ripple`; ripple frames in `assets/textures/particle/bedralis_ripple.png` (10 frames). The splash uses the vanilla `textures/particle/particles` sheet, so Aerotion's copy of it was not duplicated.
+- Shader defaults retuned for this texture: thinner/shorter streaks (`WEATHER_RAIN_WIDTH` 0.28, `WEATHER_RAIN_LENGTH` 0.50, `WEATHER_SNOW_SIZE` 0.50) and the pack flake texture is used for snow (`WEATHER_SNOW_SOFT` 0).
+
 Deliberately not done:
 - Thunder / lightning flash: no verified data source for it (`WeatherID` meaning unknown), so it is not guessed.
 - Wet ground, puddles and splashes on terrain: terrain has no rain mask or normals in this pipeline; splash particles belong to the resource pack.
