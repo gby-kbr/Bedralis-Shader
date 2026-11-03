@@ -48,7 +48,7 @@ void main() {
         vec2 lightingUV = vec2(uvX, 1.0);
         vec3 light = texture2D(s_LightingTexture, lightingUV).rgb;
         diffuse = shadeWeather(diffuse, light, v_fog.rgb, v_fog.a, v_color0.x, v_color0.zw, v_color0.y);
-        diffuse.rgb = bedralisGrade(diffuse.rgb);
+        diffuse.rgb = colorCorrection(diffuse.rgb);
     }
     gl_FragColor = diffuse;
 }

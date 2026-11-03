@@ -1,5 +1,14 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Tonemap: pure Uchimura, no macros
+
+Branch: `tonemap-pure-uchimura` (off main at `6c5d529`). Merge status: see `git log` on main.
+
+Requested by the project owner: take the Uchimura tonemap straight from their file, with no extra settings or defines (there is only one tonemap, so no type switch).
+- `tonemap.h`: `uchimura()` and `colorCorrection()` copied from the provided file with the constants inline; `bedralisGrade()` renamed to `colorCorrection()` everywhere.
+- Removed `GRADE_*` and `UCHIMURA_*` from `configuration.h`, including my own exposure and saturation steps and the gamma-free choice noted before (the file's gamma, exposure and saturation macros are not part of the tonemap and are not used).
+- Not compiled, not tested in game.
+
 ## 2026-11-03 - Tonemap: Uchimura
 
 Branch: `tonemap-uchimura` (off main at `1352b44`). Merge status: see `git log` on main.

@@ -24,7 +24,7 @@ vec3 uchimura(vec3 x, float P, float a, float m, float l, float c, float b) {
 
 // Final tonemap, applied at the end of terrain, actors, sky and weather.
 // Pure Uchimura with the original values, no extra settings.
-vec3 bedralisGrade(vec3 col) {
+vec3 colorCorrection(vec3 col) {
   const float P = 1.0;  // max display brightness
   const float a = 1.0;  // contrast
   const float m = 0.22; // linear section start

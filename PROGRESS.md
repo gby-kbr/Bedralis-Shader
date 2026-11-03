@@ -19,7 +19,7 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 ## Phase 09 details
 
 Done:
-- `tonemap.h`: `bedralisGrade()` = the plain Uchimura tonemap with the original values from newb-aerotion (P 1.0, a 1.0, m 0.22, l 0.4, c 1.33, b 0.0), no gamma, no extra settings or macros.
+- `tonemap.h`: `colorCorrection()` = the Uchimura tonemap taken verbatim from the owner's tonemap.h (fixed constants P 1.0, a 1.0, m 0.22, l 0.4, c 1.33, b 0.0; no macros, no exposure/saturation/gamma). Applied at the end of `RenderChunk`, `Actor`, `Sky` and `Weather` fragments so sky, fog and terrain keep matching. `SunMoon` and `Stars` are left alone so the sun disc stays bright.
 - `godrays.h`: `applySunGlow()` in the Sky fragment: tight halo, broad glow and soft light shafts (one noise-texture read indexed by the angle around the sun, very slow drift, longer reach at dawn/dusk, off in rain, at night, underwater, Nether and End).
 - `configuration.h`: `SUN_*` macros (`SUN_GLOW_ENABLED`, `SUN_SHAFT_STRENGTH` 0 turns the shafts off).
 

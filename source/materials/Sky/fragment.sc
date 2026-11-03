@@ -32,7 +32,7 @@ void main() {
     }
   #endif
 
-    gl_FragColor = vec4(bedralisGrade(color), 1.0);
+    gl_FragColor = vec4(colorCorrection(color), 1.0);
 #else
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif

@@ -65,7 +65,7 @@ void main() {
 #endif
 
     albedo.rgb = applyFog(albedo.rgb, v_fog.rgb, v_fog.a);
-    albedo.rgb = bedralisGrade(albedo.rgb);
+    albedo.rgb = colorCorrection(albedo.rgb);
     gl_FragColor = albedo;
 #endif
 }

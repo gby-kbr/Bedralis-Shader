@@ -83,7 +83,7 @@ void main() {
     }
 #endif
     diffuse.rgb = mix(diffuse.rgb, v_fog.rgb, v_fog.a);
-    diffuse.rgb = bedralisGrade(diffuse.rgb);
+    diffuse.rgb = colorCorrection(diffuse.rgb);
 
     gl_FragColor = diffuse;
 #endif
