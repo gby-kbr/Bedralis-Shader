@@ -1,5 +1,17 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Phase 10 follow-up 4: soft bloom edge, no horizon billows
+
+Branch: `end-sky-soft-bloom-clouds` (off `main` at `83a6a2f`). Merge status: MERGED to main (fast-forward).
+
+Owner feedback on follow-up 3: bloom should look like the reference (black hole edge not sharp), clouds closer to the reference, and the clouds sticking out above the horizon line must go.
+
+Changes (only `end_sky.png` and its generator script):
+- Removed the horizon cloud billows completely; the horizon is a clean line again.
+- Soft black hole edge: slight blur of the traced patch and of the emission, bloom bleeds over the shadow limb (shadow attenuation 0.80 -> 0.55 with a wider mask).
+- Clouds: rounded billow lumps in the height field, stronger light/shadow slope, slightly higher coverage threshold for more contrast.
+Build / test: not compiled, not tested in game. Preview is a Python port (sky only, no terrain/fog).
+
 ## 2026-11-04 - Phase 10 follow-up 3: stronger bloom, tilted disc, puffier clouds
 
 Branch: `end-sky-bloom-tilt-cumulus` (off `main` at `2278cac`). Merge status: MERGED to main (fast-forward).
