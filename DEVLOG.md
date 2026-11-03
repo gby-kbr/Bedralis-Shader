@@ -1,5 +1,23 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Phase 10 follow-up 2: more 3D black hole, two-layer Earth clouds
+
+Branch: `end-sky-3d-v2` (off main at `71c1414`). Merge status: see `git log` on main.
+
+Requested by the project owner: even more 3D and realistic like the reference, a slightly bigger black hole, no distortion of the Earth, less background distortion, and a glow like the reference.
+- `scripts/generate_end_sky_texture.py`: observer distance 14 to 11.5 radii (shadow about 20 percent bigger); disc filaments (several noise octaves, concentric fine rings, stretched streaks); background lensing limited to about 30 degrees; the clouds are composited after the black hole, so they are never bent; the Earth is opaque and hides the lower part of the black hole; two cloud layers with parallax and cast shadows; layered atmosphere glow; blue-white glow in several scales up to a very wide halo, blurred on the whole image so it has no edge; faint reflection of the ring on the cloud tops; stars fade in the horizon glow.
+- No shader or settings change (the shader only reads the texture).
+
+Problems found while tuning (fixed before merge):
+- The haze weight at the horizon was inverted again (clouds dark and noisy, bar-code strip under the horizon). Fixed, and the cloud reflection and glow are now also switched off in the haze band, where the clamped projection made vertical streaks.
+- Triangular cut-offs near bright stars came from stars lying more than one cell away along the ray not being found; stars are now limited to a thin shell (and their density raised to compensate).
+- The glow was cut at the edge of the traced patch (a faint vertical line); it is now blurred on the full image with wrap-around.
+
+Build / test results:
+- Real shader compile: NOT run. Preview: Python port of the shader lookup plus the Uchimura tonemap, 6 views. Seam across 360 degrees: max step 0.0125 (a star); tonemapped mean 0.265, max 0.83.
+- The preview shows the sky box only (no terrain, no End fog). Not a Minecraft screenshot; in-game test NOT run.
+- The nadir of an equirectangular image is stretched, so the clouds straight below look smoother than those toward the horizon.
+
 ## 2026-11-03 - Phase 10 follow-up: 3D black hole above Earth's clouds, no settings
 
 Branch: `end-sky-3d-blackhole-earth` (off main at `6e7813a`). Merge status: see `git log` on main.
