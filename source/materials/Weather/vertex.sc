@@ -9,6 +9,7 @@ $output v_color0, v_fog, v_occlusionHeight, v_occlusionUV, v_texcoord0, v_worldP
 #include <MinecraftRenderer.Materials/FogUtil.dragonh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
 #include "origin/function/fog.h"
+#include "origin/function/weather.h"
 
 uniform vec4 Dimensions;
 uniform vec4 FogAndDistanceControl;
@@ -45,8 +46,19 @@ void main() {
     worldSpacePosition -= particleBox * 0.5;
     worldSpacePosition += PositionForwardOffset.xyz;
 
+    // Occlusion lookup and fog direction use the position before any slant.
+    vec3 occlusionPosition = worldSpacePosition;
+
+    bool isRain = isRainParticle(UVOffsetAndScale, Dimensions.x);
+    vec2 particleSize = weatherParticleSize(isRain, Dimensions.xy);
+    vec3 velocity = Velocity.xyz;
+    if (isRain) {
+        velocity.x *= WEATHER_RAIN_SLANT;
+        worldSpacePosition.x -= worldSpacePosition.y * velocity.x;
+    }
+
     vec3 worldSpacePositionBottom = worldSpacePosition;
-    vec3 worldSpacePositionTop = worldSpacePositionBottom + (Velocity.xyz * Dimensions.y);
+    vec3 worldSpacePositionTop = worldSpacePositionBottom + (velocity * particleSize.y);
 
     vec4 screenSpacePositionBottom = jitterVertexPosition(worldSpacePositionBottom);
     vec4 screenSpacePositionTop = jitterVertexPosition(worldSpacePositionTop);
@@ -55,10 +67,10 @@ void main() {
     vec2 screenSpaceRightDirection = normalize(vec2(-screenSpaceUpDirection.y, screenSpaceUpDirection.x));
 
     vec4 position = mix(screenSpacePositionTop, screenSpacePositionBottom, a_texcoord0.y);
-    position.xy += (0.5 - a_texcoord0.x) * screenSpaceRightDirection * Dimensions.x;
+    position.xy += (0.5 - a_texcoord0.x) * screenSpaceRightDirection * particleSize.x;
 
-    vec2 occlusionUV = ((worldSpacePosition.xz + ViewPosition.xz) * (1.0 / 64.0)) + vec2_splat(0.5);
-    float occlusionHeight = (worldSpacePosition.y + ViewPosition.y - 0.5) * (1.0 / 255.0);
+    vec2 occlusionUV = ((occlusionPosition.xz + ViewPosition.xz) * (1.0 / 64.0)) + vec2_splat(0.5);
+    float occlusionHeight = (occlusionPosition.y + ViewPosition.y - 0.5) * (1.0 / 255.0);
 
     float fogIntensity = calculateFogIntensity(position.z, FogAndDistanceControl.z, FogAndDistanceControl.x, FogAndDistanceControl.y);
     // Only the fog color follows the atmosphere here; the intensity stays the engine's.
@@ -68,14 +80,16 @@ void main() {
         FogColor.rgb,
         vec3(FogAndDistanceControl.xy, RenderDistance.x),
         DimensionID.x);
-    vec3 fogViewDir = normalize(worldSpacePosition);
+    vec3 fogViewDir = normalize(occlusionPosition);
     vec4 fog = vec4(atmosphericFogColor(env, fogViewDir, SkyColor.rgb, FogColor.rgb), fogIntensity);
 
-    v_color0 = a_color0;
+    // v_color0 is unused by the fragment shader, so it carries our data instead:
+    // x = 1 for rain, y = daylight, zw = quad UV.
+    v_color0 = vec4(isRain ? 1.0 : 0.0, env.daylight, a_texcoord0);
     v_fog = fog;
     v_occlusionHeight = occlusionHeight;
     v_occlusionUV = occlusionUV;
     v_texcoord0 = texcoord0;
-    v_worldPos = worldSpacePosition;
+    v_worldPos = occlusionPosition;
     gl_Position = position;
 }

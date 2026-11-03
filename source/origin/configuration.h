@@ -130,3 +130,16 @@
 #define WATER_REFLECT_CLOUDS 1
 
 #endif
+
+// ---------------------------------------------------------------------------
+// Weather (Phase 08)
+// ---------------------------------------------------------------------------
+#define WEATHER_RAIN_SLANT 1.5         // 1.0 = engine slant, higher = rain leans more with the wind
+#define WEATHER_RAIN_WIDTH 0.60        // rain streak width scale (1.0 = engine size)
+#define WEATHER_RAIN_LENGTH 1.00       // rain streak length scale
+#define WEATHER_SNOW_SIZE 0.80         // snowflake size scale
+#define WEATHER_RAIN_OPACITY 0.70      // rain streak opacity scale
+#define WEATHER_SNOW_OPACITY 0.95      // snowflake opacity scale
+#define WEATHER_RAIN_SKY_BLEND 0.35    // how much rain takes the sky/fog color (soft, misty look)
+#define WEATHER_SNOW_SOFT 0.80         // 0 = engine flake texture, 1 = soft round speck
+#define WEATHER_RAIN_DARKEN 0.85       // rain brightness at full daylight (lower = darker streaks)

@@ -1,5 +1,26 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 08: Weather system
+
+Branch: `phase-08-weather-system` (off main at `9fedee4`). Merge status: see `git log` on main.
+
+Changes:
+- `source/origin/function/weather.h` (was empty): rain/snow detection, sizes, soft snow speck, `shadeWeather()`.
+- `source/materials/Weather/vertex.sc`, `fragment.sc`: use them; `v_color0` repurposed to carry rain flag, daylight and quad UV.
+- `source/origin/configuration.h`: `WEATHER_*` macros.
+
+Decisions:
+- Thunder is not implemented: there is still no verified way to read it.
+- Terrain wetness is not possible without a rain mask, so it is left out rather than faked.
+- Rain slant follows newb-aerotion's method (shift x by y times the velocity) but keeps the occlusion lookup on the original position.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler available).
+- Python port of `shadeWeather()` on 20000 random inputs: output stays within 0..1.
+- No in-game test; rain/snow detection by sprite sheet shape is unverified here.
+
+Assumptions still unverified: `UVOffsetAndScale.w > 3.8 * .z` and `Dimensions.x < 0.1` really separate rain from snow; unused `v_color0` is not needed by the engine for anything else; slant has an effect (needs nonzero `Velocity.x`).
+
 ## 2026-11-03 - Phase 07: Cirrus cloud system
 
 Branch: `phase-07-cloud-system` (off main at `751fab4`). Merge status: see `git log` on main.

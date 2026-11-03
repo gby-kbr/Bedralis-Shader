@@ -11,10 +11,25 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 05 | Lighting system | MERGED (not compiled / not tested in game) |
 | 06 | Water system | MERGED (not compiled / not tested in game) |
 | 07 | Cloud system (cirrus) | MERGED (not compiled / not tested in game) |
-| 08 | Weather system | NOT STARTED |
+| 08 | Weather system | MERGED (not compiled / not tested in game) |
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 08 details
+
+Done:
+- `weather.h`: `isRainParticle()` (rain vs snow by sprite sheet shape and width, same test newb-aerotion uses), `weatherParticleSize()`, `weatherSpeck()`, `shadeWeather()`.
+- `Weather` vertex: thinner rain streaks, stronger rain slant, smaller snowflakes. Occlusion lookup and fog direction still use the unslanted position.
+- `Weather` fragment: rain takes part of the sky color (misty) and is slightly darker in daylight; snow becomes a soft round speck; fog fades alpha as well as color; engine lightmap/occlusion logic unchanged.
+- `v_color0` (unused by the fragment before) now carries: x = rain flag, y = daylight, zw = quad UV. No new varying.
+- `configuration.h`: `WEATHER_*` macros.
+- Rain already affects the sky (Phase 02), fog (Phase 04), light (Phase 05), water ripples (Phase 06) and cirrus fade (Phase 07) through `rainFactor`.
+
+Deliberately not done:
+- Thunder / lightning flash: no verified data source for it (`WeatherID` meaning unknown), so it is not guessed.
+- Wet ground, puddles and splashes on terrain: terrain has no rain mask or normals in this pipeline; splash particles belong to the resource pack.
+- Smooth rain transitions: the engine already blends the fog values `detectRain` reads.
 
 ## Phase 07 details
 
