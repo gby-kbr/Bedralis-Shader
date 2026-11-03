@@ -1,8 +1,6 @@
 #ifndef TONEMAP_H
 #define TONEMAP_H
 
-#include "origin/configuration.h"
-
 // Uchimura 2017, "HDR theory and practice"
 // Math: https://www.desmos.com/calculator/gslcdxvipg
 // Same function and default values as the tonemap used in newb-aerotion.
@@ -24,18 +22,16 @@ vec3 uchimura(vec3 x, float P, float a, float m, float l, float c, float b) {
   return T * w0 + L * w1 + S * w2;
 }
 
-// Final grade: exposure, Uchimura tonemap, saturation.
-vec3 bedralisGrade(vec3 c) {
-#if GRADE_ENABLED
-  c = max(c * GRADE_EXPOSURE, vec3(0.0, 0.0, 0.0));
-  c = uchimura(c, UCHIMURA_MAX, UCHIMURA_CONTRAST, UCHIMURA_LINEAR_START,
-               UCHIMURA_LINEAR_LENGTH, UCHIMURA_BLACK, UCHIMURA_PEDESTAL);
-  float luma = dot(c, vec3(0.299, 0.587, 0.114));
-  c = mix(vec3(luma, luma, luma), c, GRADE_SATURATION);
-  return clamp(c, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
-#else
-  return c;
-#endif
+// Final tonemap, applied at the end of terrain, actors, sky and weather.
+// Pure Uchimura with the original values, no extra settings.
+vec3 bedralisGrade(vec3 col) {
+  const float P = 1.0;  // max display brightness
+  const float a = 1.0;  // contrast
+  const float m = 0.22; // linear section start
+  const float l = 0.4;  // linear section length
+  const float c = 1.33; // black
+  const float b = 0.0;  // pedestal
+  return uchimura(col, P, a, m, l, c, b);
 }
 
 #endif
