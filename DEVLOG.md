@@ -4,15 +4,15 @@
 
 Branch: `weather-textures-and-particles` (off main at `aecd0ea`). Merge status: see `git log` on main.
 
-Requested by the project owner: use the Aerotion weather texture and the same particles, adapted to Bedralis.
+Requested by the project owner: use the Aerotion weather texture and `particles.png`, adapted to Bedralis. I first read "particles" as the rain splash/ripple particle effects; the owner corrected this (they meant the particle sheet), so those files were removed again.
 
 Changes:
-- Added `weather.png`, `particles/rain_splash.json`, `particles/rain_ripple.json` (identifier renamed to `bedralis:rain_ripple`) and `bedralis_ripple.png`, all copied from the owner's newb-aerotion repo.
+- Added `weather.png` and `textures/particle/particles.png`, copied from the owner's newb-aerotion repo (splash/ripple particle JSONs were added by mistake and removed).
 - Retuned the `WEATHER_*` defaults for the thinner texture; snow keeps the pack flake (`WEATHER_SNOW_SOFT` 0).
 
 Notes:
-- Aerotion's `particles.png` is the vanilla sheet, so it was not copied; the splash references the vanilla one by name.
-- Particle JSON validated as JSON only. Not loaded in game; frame counts and sizes are as in Aerotion.
+- Earlier I judged `particles.png` to be the vanilla sheet and skipped it; that was a guess from a quick look and was wrong to act on.
+- Not loaded in game.
 
 ## 2026-11-03 - Phase 08: Weather system
 

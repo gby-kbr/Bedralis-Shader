@@ -28,7 +28,7 @@ Done:
 
 Weather textures and particles (follow-up, merged):
 - `assets/textures/environment/weather.png`: the rain/snow sprite sheet from newb-aerotion (same author), used as is.
-- `assets/particles/rain_splash.json` and `rain_ripple.json`: same splash + expanding ripple effect as Aerotion, renamed to `bedralis:rain_ripple`; ripple frames in `assets/textures/particle/bedralis_ripple.png` (10 frames). The splash uses the vanilla `textures/particle/particles` sheet, so Aerotion's copy of it was not duplicated.
+- `assets/textures/particle/particles.png`: the particle sheet from newb-aerotion, used as is (it replaces the vanilla sheet). The rain splash/ripple particle files that were first added by mistake were removed again on request; only the sheet is wanted.
 - Shader defaults retuned for this texture: thinner/shorter streaks (`WEATHER_RAIN_WIDTH` 0.28, `WEATHER_RAIN_LENGTH` 0.50, `WEATHER_SNOW_SIZE` 0.50) and the pack flake texture is used for snow (`WEATHER_SNOW_SOFT` 0).
 
 Deliberately not done:
