@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Generate the 360 degree equirectangular outer-space texture for The End.
+"""Generate the 360 degree equirectangular sky texture for The End.
 
-Output: assets/textures/environment/EndSkyTexture.png (2048x1024, RGB).
+Output: assets/textures/environment/end_sky.png (2048x1024, RGB).
 
 Everything is computed from 3D view directions, so the left and right edges meet
-exactly and nothing is stretched at the poles. Layers:
-  - a galactic band with a bright core and dust lanes,
-  - two faint nebulae (violet and teal, matching the End palette),
-  - three star layers (faint, medium, rare bright) with real star colors.
+exactly and nothing is stretched at the poles. Layers, kept deliberately subdued:
+  - a dark navy-violet sky with a thin glowing horizon,
+  - stars (faint, medium, rare bright) with real star colors, plus a faint galactic band
+    and two soft nebulae,
+  - a black hole just above the horizon: dark shadow, thin photon ring, lensed arc and a
+    thin accretion disc seen almost edge-on,
+  - a dark sea of clouds below the horizon, lit from the side of the black hole,
+    with a dim reflection of the ring.
 Deterministic (fixed seed). Requires numpy and Pillow.
 
 Usage: python3 scripts/generate_end_sky_texture.py [output.png]
@@ -18,7 +22,7 @@ from PIL import Image
 
 W, H = 2048, 1024
 SEED = 20261103
-OUT = sys.argv[1] if len(sys.argv) > 1 else "assets/textures/environment/EndSkyTexture.png"
+OUT = sys.argv[1] if len(sys.argv) > 1 else "assets/textures/environment/end_sky.png"
 
 # ----------------------------------------------------------------------------- hashing / noise
 def hash3(ix, iy, iz, salt):
@@ -97,6 +101,56 @@ def star_layer(d, radius, prob, sigma, bright_lo, bright_hi, power, salt, band_b
                 acc += w[..., None] * col
     return acc
 
+# ----------------------------------------------------------------------------- black hole
+BH_AZ = -1.15      # azimuth (radians, same convention as the shader: atan2(x, z))
+BH_EL = 0.060      # elevation of the center above the horizon (radians)
+BH_RS = 0.105      # radius of the shadow (radians)
+
+def bh_basis():
+    c = np.array([np.sin(BH_AZ) * np.cos(BH_EL), np.sin(BH_EL), np.cos(BH_AZ) * np.cos(BH_EL)], np.float32)
+    up = np.array([0.0, 1.0, 0.0], np.float32)
+    e1 = np.cross(c, up); e1 /= np.linalg.norm(e1)
+    e2 = up - np.dot(up, c) * c; e2 /= np.linalg.norm(e2)
+    return c, e1, e2
+
+def black_hole(d):
+    """Returns (emission rgb, shadow mask 0..1) for directions d."""
+    c, e1, e2 = bh_basis()
+    dc = np.sum(d * c, -1)
+    ok = dc > 0.2
+    x = np.where(ok, np.sum(d * e1, -1) / np.maximum(dc, 0.2), 9.0)
+    y = np.where(ok, np.sum(d * e2, -1) / np.maximum(dc, 0.2), 9.0)
+    R = BH_RS
+    r = np.sqrt(x * x + y * y)
+    shadow = 1.0 - ss(R * 0.93, R * 1.03, r)
+
+    # Thin photon ring, brighter on the approaching side (right).
+    ring = np.exp(-((r - 1.10 * R) / (0.075 * R)) ** 2) * (0.65 + 0.35 * np.clip(x / np.maximum(r, 1e-4), -1, 1))
+    # Lensed back of the disc: a wider arc that bends over the top of the shadow.
+    top = ss(-0.25, 0.45, y / R)
+    arc = np.exp(-((r - 1.55 * R) / (0.40 * R)) ** 2) * top
+    arc += 0.35 * np.exp(-((r - 2.2 * R) / (0.9 * R)) ** 2) * top * top
+
+    # Thin disc seen almost edge-on, with streaks along it.
+    ax = np.abs(x)
+    thick = 0.11 * R * (1.0 + 0.30 * ax / R)
+    prof = np.exp(-(y / thick) ** 2)
+    radial = np.exp(-ax / (4.2 * R)) * np.clip(1.25 * R / np.maximum(ax, 1e-4), 0, 1) ** 0.8
+    gate = ss(1.05 * R, 1.35 * R, ax)
+    streak = fbm(np.stack([x * 9.0, y * 140.0, np.zeros_like(x)], -1), SEED + 700, 3)
+    disc = prof * radial * gate * (0.55 + 0.9 * streak)
+
+    glow = 0.13 * np.exp(-(r / (3.0 * R)) ** 2) + 0.05 * np.exp(-(r / (9.0 * R)) ** 2)
+
+    ring_c = np.array([0.80, 0.84, 1.00], np.float32)
+    disc_c = np.array([0.66, 0.68, 1.00], np.float32)
+    glow_c = np.array([0.20, 0.26, 0.62], np.float32)
+    emit = ring[..., None] * ring_c * 0.70 + arc[..., None] * ring_c * 0.34 \
+        + disc[..., None] * disc_c * 0.80 + glow[..., None] * glow_c
+    emit = emit * ok[..., None]
+    shadow = np.where(ok, shadow, 0.0)
+    return emit.astype(np.float32), shadow.astype(np.float32)
+
 # ----------------------------------------------------------------------------- image
 def render_rows(j0, j1):
     jj, ii = np.mgrid[j0:j1, 0:W]
@@ -105,43 +159,83 @@ def render_rows(j0, j1):
     ang = (u - 0.5) * 2.0 * np.pi
     th = v * np.pi
     d = np.stack([np.sin(ang) * np.sin(th), np.cos(th), np.cos(ang) * np.sin(th)], -1).astype(np.float32)
+    y = d[..., 1]
 
-    # Galactic band: a great circle tilted away from the equator.
+    # --- sky: navy gradient, brighter toward the horizon
+    hz = np.exp(-np.abs(y) / 0.22)
+    base = np.array([0.010, 0.012, 0.030], np.float32) + hz[..., None] * np.array([0.020, 0.036, 0.085], np.float32)
+
+    # --- faint galactic band and nebulae (subtle)
     n = np.array([0.30, 0.86, 0.41], np.float32); n /= np.linalg.norm(n)
     lat = np.sum(d * n, -1)
-    core_dir = np.cross(n, np.array([0.0, 0.0, 1.0], np.float32)); core_dir /= np.linalg.norm(core_dir)
-    along = np.sum(d * core_dir, -1)
-
     warp = 0.20 * (fbm(d * 2.2, SEED + 10, 3) - 0.5)
     band = np.exp(-((lat + warp) / 0.17) ** 2)
     mist = fbm(d * 3.0 + 4.0, SEED + 20, 5)
-    cloud = band * (0.45 + 0.9 * ss(0.30, 0.80, mist))
     dust = ss(0.52, 0.72, fbm(d * 5.5 + 9.0, SEED + 30, 5)) * np.exp(-((lat + warp * 0.5) / 0.12) ** 2)
-    core = np.exp(-(along / 0.65) ** 2) * np.exp(-((lat + warp) / 0.22) ** 2)
-    glow = cloud * (1.0 - 0.80 * dust) + 0.9 * core * (1.0 - 0.6 * dust)
+    glow = band * (0.45 + 0.9 * ss(0.30, 0.80, mist)) * (1.0 - 0.8 * dust)
+    band_rgb = glow[..., None] * np.array([0.42, 0.38, 0.62], np.float32) * 0.10
+    n1 = ss(0.55, 0.82, fbm(d * 1.5 + 21.0, SEED + 40, 5)) ** 1.6
+    n2 = ss(0.58, 0.84, fbm(d * 1.9 + 53.0, SEED + 50, 5)) ** 1.6
+    neb = n1[..., None] * np.array([0.30, 0.10, 0.42], np.float32) * 0.22 \
+        + n2[..., None] * np.array([0.06, 0.22, 0.30], np.float32) * 0.20
 
-    band_col = np.stack([0.50, 0.40, 0.66], 0).astype(np.float32)       # cool violet
-    core_col = np.array([0.95, 0.72, 0.62], np.float32)                 # warm core
-    base = glow[..., None] * (band_col * (1 - core[..., None] * 0.7) + core_col * (core[..., None] * 0.7)) * 0.24
+    # --- stars (fewer and finer than before)
+    boost = 1.0 + 1.0 * band
+    st = star_layer(d, 70.0, 0.012, 0.0020, 0.12, 0.55, 3.0, SEED + 100, boost)
+    st += star_layer(d, 38.0, 0.007, 0.0020, 0.28, 0.95, 4.0, SEED + 200, boost)
+    st += star_layer(d, 16.0, 0.004, 0.0024, 0.55, 1.70, 5.0, SEED + 300)
 
-    # Nebulae: violet and teal, independent of the band, very soft.
-    n1 = ss(0.52, 0.80, fbm(d * 1.5 + 21.0, SEED + 40, 5)) ** 1.6
-    n2 = ss(0.56, 0.82, fbm(d * 1.9 + 53.0, SEED + 50, 5)) ** 1.6
-    neb = n1[..., None] * np.array([0.34, 0.10, 0.46], np.float32) * 0.55 \
-        + n2[..., None] * np.array([0.06, 0.26, 0.34], np.float32) * 0.45
+    # --- horizon limb: thin blue glow, stronger toward the black hole
+    ch = np.array([np.sin(BH_AZ), np.cos(BH_AZ)], np.float32)
+    hh = np.stack([d[..., 0], d[..., 2]], -1)
+    hh = hh / np.maximum(np.linalg.norm(hh, axis=-1, keepdims=True), 1e-4)
+    toward = np.clip(np.sum(hh * ch, -1), 0, 1) ** 2
+    limb = np.exp(-np.abs(y) / 0.016) * (0.55 + 1.6 * toward)
+    limb_rgb = limb[..., None] * np.array([0.050, 0.100, 0.260], np.float32)
 
-    # Stars: more of them inside the band, rare bright ones everywhere.
-    boost = 1.0 + 1.6 * band
-    s = star_layer(d, 70.0, 0.016, 0.0022, 0.12, 0.60, 3.0, SEED + 100, boost)
-    s += star_layer(d, 38.0, 0.009, 0.0022, 0.30, 1.00, 4.0, SEED + 200, boost)
-    s += star_layer(d, 16.0, 0.006, 0.0026, 0.60, 2.00, 5.0, SEED + 300)
-    # Unresolved faint stars in the band look like a fine glow.
-    fine = ss(0.45, 0.85, fbm(d * 40.0, SEED + 60, 2)) * band * 0.06
+    # --- sea of clouds below the horizon
+    below = y < 0.0
+    ys = np.minimum(y, -0.035)
+    t = 1.0 / (-ys)
+    P = np.stack([d[..., 0] * t, d[..., 2] * t, np.zeros_like(t)], -1) * 1.5
+    q = fbm(P * 0.5 + 7.0, SEED + 800, 3)
+    Pw = P + np.stack([q - 0.5, (q - 0.5) * 0.7, np.zeros_like(q)], -1) * 1.3
+    def cloud_height(Pq):
+        return 0.62 * fbm(Pq, SEED + 810, 5) + 0.38 * fbm(Pq * 3.7 + 11.0, SEED + 815, 4)
+    cn = cloud_height(Pw)
+    Ldir = np.array([np.sin(BH_AZ), np.cos(BH_AZ)], np.float32) * 0.07
+    cl_n = cloud_height(Pw + np.array([Ldir[0], Ldir[1], 0.0], np.float32))
+    dens = ss(0.43, 0.56, cn)
+    puff = fbm(Pw * 3.2 + 3.0, SEED + 820, 3)
+    dens = np.clip(dens * (0.70 + 0.6 * puff), 0.0, 1.0)
+    lit = np.clip(0.50 + (cn - cl_n) * 14.0, 0.0, 1.0) * (0.35 + 0.65 * dens)
+    near = np.clip(np.sum(hh * ch, -1), 0, 1)
+    bright = 0.45 + 1.15 * near ** 2
+    sea = np.array([0.010, 0.016, 0.040], np.float32)
+    c_shadow = np.array([0.030, 0.044, 0.100], np.float32)
+    c_lit = np.array([0.30, 0.37, 0.60], np.float32)
+    cloud = sea + (c_shadow + (c_lit - c_shadow) * lit[..., None] * bright[..., None] - sea) * dens[..., None]
+    w = (1.0 - ss(-0.22, -0.015, y)) * below          # clouds fade into the haze toward the horizon
+    cover = w * dens                          # how much of the sky below is hidden by cloud
 
-    color = base + neb + s + fine[..., None] * np.array([0.8, 0.8, 1.0], np.float32)
-    # A touch of deep violet so the darkest sky is not dead black (matches the End fog).
-    color += np.array([0.010, 0.004, 0.020], np.float32)
-    return color
+    # --- black hole (emission) and its dim reflection on the clouds
+    emit, shadow = black_hole(d)
+    dm = d.copy(); dm[..., 1] = -dm[..., 1]
+    emit_m, _ = black_hole(dm)
+
+    sky = (base + band_rgb + neb) * (1.0 - shadow[..., None])
+    stars_vis = np.where(below, 1.0 - cover, 1.0)
+    sky = sky + st * (stars_vis * (1.0 - shadow))[..., None]
+    sky = sky + emit * np.where(below, 1.0 - np.clip(w * (0.45 + 0.55 * dens), 0, 1), 1.0)[..., None]
+    sky = sky + limb_rgb
+    # Below the horizon: haze first, then the clouds in front of it.
+    haze = base + limb_rgb
+    col_below = haze * (1.0 - w[..., None]) + cloud * w[..., None]
+    col_below = col_below + emit_m * (0.22 * (w * (0.3 + 0.7 * lit))[..., None]) * 0.0
+    refl = emit_m * (0.20 * w * (0.25 + 0.75 * dens))[..., None]
+    col_below = col_below + refl + sky * (1.0 - w[..., None]) * 0.0
+    out = np.where(below[..., None], col_below + (sky - haze) * (1.0 - w[..., None]), sky)
+    return out + np.array([0.004, 0.003, 0.010], np.float32)
 
 def main():
     rows = []
@@ -150,7 +244,6 @@ def main():
         rows.append(render_rows(j, min(j + step, H)))
         print(f"row {j}/{H}", end="\r", flush=True)
     img = np.concatenate(rows, 0)
-    # Soft shoulder so bright stars do not clip harshly, then to 8-bit.
     img = 1.0 - np.exp(-img * 1.25)
     img = np.clip(img, 0, 1) ** (1.0 / 1.15)
     Image.fromarray((img * 255 + 0.5).astype(np.uint8), "RGB").save(OUT, optimize=True)

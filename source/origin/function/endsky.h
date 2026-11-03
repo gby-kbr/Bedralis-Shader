@@ -4,7 +4,7 @@
 #include "origin/configuration.h"
 
 // Outer-space sky of The End, from a 360 degree equirectangular texture
-// (assets/textures/environment/EndSkyTexture.png, made by scripts/generate_end_sky_texture.py).
+// (assets/textures/environment/end_sky.png, made by scripts/generate_end_sky_texture.py).
 // Cost: one texture read, one atan and one acos per pixel; no procedural noise.
 // Include only in the EndSky fragment shader (it declares the sampler, buffer
 // buffers/endskytexture.json).

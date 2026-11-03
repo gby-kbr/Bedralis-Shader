@@ -1,11 +1,30 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 10 follow-up: black hole and cloud sea (end_sky.png)
+
+Branch: `end-sky-blackhole-clouds` (off main at `f2b3b82`). Merge status: see `git log` on main.
+
+Requested by the project owner: a 360 degree texture in the style of a reference image (black hole at the horizon, stars above, sea of clouds below), not too flashy, saved as `end_sky.png`, with a preview of how it looks in The End sky.
+- `scripts/generate_end_sky_texture.py` rewritten: black hole, cloud sea, horizon glow, fewer and finer stars, fainter band and nebulae. Output `assets/textures/environment/end_sky.png` (replaces `EndSkyTexture.png`; the buffer now points to `textures/environment/end_sky`).
+- The shader (`endsky.h`, `EndSky`) is unchanged.
+
+Problems found while tuning (all fixed before merge):
+- The cloud fade weight was inverted (clouds vanished and a black band sat under the horizon).
+- Clamping the cloud projection too close to the horizon left vertical streaks; the clamp is now at y = -0.035 and the clouds fade out before it.
+- Clouds were blurry blobs; added a finer height layer for puffy detail and stronger side lighting.
+- Stars showed through the black hole shadow; they are now masked by it.
+
+Build / test results:
+- Real shader compile: NOT run. Preview: Python port of the shader lookup plus the Uchimura tonemap, 6 views (toward the black hole, up at it, at the edge of view, opposite side, straight up, down at the clouds). Sampling across the 360 degree seam shows no jump (max step 0.004). Tonemapped range 0.017..0.79.
+- The preview shows the sky box only: it has no terrain, no End fog and no sky rotation. Not a Minecraft screenshot; in-game test NOT run.
+- The black hole is intentionally small (about 12 degrees across) and dim compared with the reference; `END_SKY_BRIGHTNESS` scales everything.
+
 ## 2026-11-03 - Phase 10: The End outer-space sky
 
 Branch: `phase-10-end-sky` (off main at `c9ffcae`). Merge status: see `git log` on main.
 
 Changes:
-- New: `scripts/generate_end_sky_texture.py`, `assets/textures/environment/EndSkyTexture.png`, `source/origin/function/endsky.h`, `source/materials/EndSky/buffers/endskytexture.json`.
+- New: `scripts/generate_end_sky_texture.py`, `assets/textures/environment/EndSkyTexture.png` (later renamed `end_sky.png`), `source/origin/function/endsky.h`, `source/materials/EndSky/buffers/endskytexture.json`.
 - Changed: `EndSky` vertex and fragment, `configuration.h` (`END_SKY_*`).
 
 Decisions:
