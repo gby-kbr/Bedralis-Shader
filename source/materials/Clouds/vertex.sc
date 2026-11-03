@@ -7,6 +7,7 @@ $output v_color0, v_texcoord0, v_worldPos
 
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
+#include "origin/configuration.h"
 
 uniform vec4 CloudColor;
 uniform vec4 DistanceControl;
@@ -28,4 +29,10 @@ void main() {
     v_texcoord0 = a_texcoord0;
     v_worldPos = worldPosition;
     gl_Position = jitterVertexPosition(worldPosition);
+
+#if !VANILLA_CLOUDS
+    // The sky draws the clouds (cirrus), so the vanilla block clouds are collapsed
+    // to a point and never rasterized. Set VANILLA_CLOUDS to 1 to bring them back.
+    gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+#endif
 }

@@ -1,7 +1,31 @@
-$input v_color0, v_texcoord0, v_worldPos
+#ifndef INSTANCING
+  $input v_skyEnvA, v_worldPos, v_skyEnvB, v_skyEnvC
+#endif
 
 #include <bgfx_shader.sh>
 
+#ifndef INSTANCING
+  #include "origin/function/clouds.h"
+
+  uniform vec4 SkyColor;
+  uniform vec4 FogColor;
+#endif
+
 void main() {
-    gl_FragColor = v_color0;
+#ifndef INSTANCING
+    vec3 viewDir = normalize(v_worldPos);
+    environment env = unpackSkyEnvironment(v_skyEnvA, v_skyEnvB, v_skyEnvC, FogColor.rgb);
+
+    vec3 color = calculateSkyColor(env, skyHorizonT(viewDir.y), viewDir, SkyColor.rgb, FogColor.rgb);
+
+  #if CIRRUS_ENABLED
+    if (!env.underwater && !env.isNether && !env.isEnd) {
+        color = applyCirrus(color, env, viewDir, v_skyEnvB.z);
+    }
+  #endif
+
+    gl_FragColor = vec4(color, 1.0);
+#else
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+#endif
 }

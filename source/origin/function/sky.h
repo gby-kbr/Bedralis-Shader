@@ -63,4 +63,41 @@ vec3 calculateSkyColor(environment env, float horizonT, vec3 viewDir, vec3 vanil
   return clamp(mix(c, vanilla, SKY_BIOME_TINT), vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
 }
 
+// 0 at the zenith, 1 at and below the horizon. Quadratic so the horizon band stays narrow.
+float skyHorizonT(float viewDirY) {
+  float t = 1.0 - clamp(viewDirY, 0.0, 1.0);
+  return t * t;
+}
+
+// Wind phase for the cirrus, in [0, 4). It is periodic: the texture tiles every 1.0 and
+// every layer offset is an integer multiple of the phase, so the wrap from 4 back to 0
+// cannot be seen. Compute it in the vertex shader and pass it on.
+float cirrusWindPhase(float time) {
+  return fract(time * (CIRRUS_SPEED * 0.25)) * 4.0;
+}
+
+// The Sky vertex shader does the trigonometry once (4 vertices) and packs the result
+// into three vec4 varyings:
+//   A = (daylight, nightFactor, dawnFactor, duskFactor)
+//   B = (rainFactor, underwater, cirrus wind phase, dimension)
+//   C = (sunDir.xyz, unused)
+// The fragment shader unpacks them with this function.
+environment unpackSkyEnvironment(vec4 a, vec4 b, vec4 c, vec3 fogColor) {
+  environment env;
+  env.daylight = a.x;
+  env.nightFactor = a.y;
+  env.dawnFactor = a.z;
+  env.duskFactor = a.w;
+  env.rainFactor = b.x;
+  env.underwater = b.y > 0.5;
+  env.dimension = b.w;
+  env.isNether = abs(b.w - float(DIM_NETHER)) < 0.5;
+  env.isEnd = abs(b.w - float(DIM_END)) < 0.5;
+  env.sunDir = c.xyz;
+  env.dayFactor = c.y;
+  env.moonDir = -c.xyz;
+  env.fogCol = fogColor;
+  return env;
+}
+
 #endif

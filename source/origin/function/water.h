@@ -6,13 +6,18 @@
 #include "origin/function/detection.h"
 #include "origin/function/celestial.h"
 #include "origin/function/wave.h"
+#ifdef WATER_CLOUD_REFLECTION
+  // Only the RenderChunk fragment shader defines this: it is the only place that
+  // declares the noise sampler (clouds.h) for the water.
+  #include "origin/function/clouds.h"
+#endif
 
 // Water shading for the RenderChunk fragment shader.
 //
 // Reflections are analytic and only cover what the shader can know without
-// reading the scene: the sky gradient and the sun and moon. There is no
+// reading the scene: the sky gradient, the sun, the moon and the cirrus. There is no
 // screen-space reflection (no usable depth/color buffer here, and a wrong
-// reflection looks worse than none). Cloud reflection comes with Phase 07.
+// reflection looks worse than none).
 
 // More natural water color: slightly less saturated and nudged toward a soft teal,
 // keeping the luminance of the lit engine color.
@@ -65,6 +70,11 @@ vec4 shadeWater(vec4 water, vec3 worldPos, vec3 camPos, float time, float timeOf
   h = h * h;
   vec3 zenith = horizonColor * mix(WATER_SKY_ZENITH_RATIO, vec3(0.9, 0.9, 0.9), rain);
   vec3 sky = mix(zenith, horizonColor, h);
+#ifdef WATER_CLOUD_REFLECTION
+  // Cirrus in the reflection (same texture and wind as the sky).
+  vec4 cloudRefl = cirrusReflection(R, time, sunDirection(timeOfDay).y, rain);
+  sky = mix(sky, cloudRefl.rgb, cloudRefl.a);
+#endif
 
   // Sun and moon glints (also a faint broad glow around the sun).
   vec3 sunDir = sunDirection(timeOfDay);

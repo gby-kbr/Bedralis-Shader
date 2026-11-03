@@ -3,6 +3,9 @@ $input v_clipPosition, v_worldPosition, v_color0, v_ditheringAndMaskTinting, v_f
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/DitherUtil.dragonh>
 #include "origin/function/lighting.h"
+#if WATER_REFLECT_CLOUDS
+  #define WATER_CLOUD_REFLECTION
+#endif
 #include "origin/function/water.h"
 
 uniform vec4 FogColor;

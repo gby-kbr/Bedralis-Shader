@@ -10,11 +10,30 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 | 04 | Atmospheric system | MERGED (not compiled / not tested in game) |
 | 05 | Lighting system | MERGED (not compiled / not tested in game) |
 | 06 | Water system | MERGED (not compiled / not tested in game) |
-| 07 | Cloud system | NOT STARTED |
+| 07 | Cloud system (cirrus) | MERGED (not compiled / not tested in game) |
 | 08 | Weather system | NOT STARTED |
 | 09 | Advanced visual effects | NOT STARTED |
 | 10 | Realistic The End outer space sky | NOT STARTED |
 | 11 | Final optimization & quality control | NOT STARTED |
+
+## Phase 07 details
+
+Done:
+- Cirrus clouds painted on the sky from a tileable noise texture (`assets/textures/environment/CirrusTexture.png`, 256x256; R = strands, G = veil mass, B = fine detail), loaded through `buffers/noisetexture.json` (Sky slot 9, RenderChunk slot 7). Three texture reads per pixel, no procedural noise, no loops.
+- `clouds.h`: `cirrusUV` (flattened dome projection), `cirrusThickness`, `cirrusLight`, `cirrusLitColor`, `applyCirrus`, `cirrusReflection`.
+- Wind: `cirrusWindPhase()` in `sky.h`, periodic in [0, 4) so the scroll wraps seamlessly on every layer.
+- Lighting: lit/shade colors, twilight tint, high cirrus stays lit a little below the horizon, silver lining near the sun, aerial perspective at the horizon, night color, fade-out in rain.
+- `Sky` material reworked as a full-screen quad (view direction rebuilt from `u_invViewProj`, same technique as newb-aerotion); environment packed into three vec4 varyings; `unpackSkyEnvironment()` in `sky.h`. The instanced variant draws nothing.
+- Vanilla block clouds hidden by default (`VANILLA_CLOUDS 0` in `configuration.h`; set 1 to bring them back).
+- Water reflects the cirrus (`WATER_REFLECT_CLOUDS`, defined only in the RenderChunk fragment so the sampler is declared only there).
+- `configuration.h`: `CIRRUS_*`, `VANILLA_CLOUDS`, `WATER_REFLECT_CLOUDS`.
+- Removed `common/uniforms/FogAndDistanceControl.json` (added in Phase 02): the engine declares the uniform itself, and a duplicate definition could shadow it.
+- `scripts/generate_cirrus_texture.py`: deterministic generator for the texture (seed 20261102).
+
+Deliberately not done:
+- Cloud shadows on terrain: no shadow map in this pipeline.
+- Volumetric or layered cumulus: too heavy for mobile and not requested.
+- Thunder cloud lighting: needs thunder detection.
 
 ## Phase 06 details
 

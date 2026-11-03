@@ -1,5 +1,34 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 07: Cirrus cloud system
+
+Branch: `phase-07-cloud-system` (off main at `751fab4`). Merge status: see `git log` on main.
+
+Request from the project owner: cirrus clouds, built from `buffers/noisetexture.json` and a noise texture, light and realistic, matching a reference screenshot (soft veil plus sparse fibrous wisps).
+
+Changes:
+- New: `clouds.h`, `CirrusTexture.png`, `scripts/generate_cirrus_texture.py`, `Sky/buffers/noisetexture.json`, `RenderChunk/buffers/noisetexture.json`.
+- Changed: `Sky` vertex/fragment/varying.def (full-screen quad), `sky.h` (wind phase, env unpacking), `water.h` + `RenderChunk/fragment.sc` (cirrus reflection), `Clouds/vertex.sc` (vanilla clouds optional), `configuration.h`.
+- Removed: `common/uniforms/FogAndDistanceControl.json`.
+
+Decisions:
+- The Phase 02 sky assumed a camera-centered dome and `a_color0.x` as a height gradient; neither was ever verified. The Sky is now a full-screen quad, a technique already proven in newb-aerotion, so cloud direction no longer depends on the mesh.
+- Trig is done in the vertex shader and passed as packed varyings; the fragment shader only samples and mixes.
+- Texture channels are rank-transformed to uniform 0..1, so a threshold equals a coverage fraction.
+
+Provenance note: `CirrusTexture.png`, `scripts/` and an empty local branch of the same name already existed in the working copy when this phase began. I read the script fully, regenerated the texture from it (pixel-identical, tileable) and used it as-is; the final script is documented in its docstring.
+
+Problems found:
+- First render looked like cottage cheese: texture channels were isotropic blobs. Regenerated an anisotropic veil mass and sparser strands; warp taken from G only (B warp made jagged edges); added a low-frequency envelope tap so the veil is not uniform across the sky; reduced warp to stop curly strands; twilight orange toned down with `CIRRUS_TWILIGHT_TINT`.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler available).
+- Python port of the cloud math rendered on six scenes (midday up, midday horizon, sunset, night, rain, sunrise); no value outside 0..1; alpha max 0.88 (0.31 at night, 0 in rain); output at wind phase 0 and 4 is identical (seamless wrap); the Python parameters match `configuration.h`.
+- Previews are approximations, not Minecraft screenshots.
+- In-game test: NOT run.
+
+Assumptions still unverified: the Sky mesh behaves like the Aerotion quad (`a_position.xzy` clamped to +-0.5); packed COLOR0..3 varyings are accepted; buffer register slots (9 Sky, 7 RenderChunk) do not collide; `ViewPositionAndTime.w` is seconds; `texture2DLod` and `SAMPLER2D_AUTOREG` work with the buffer's `sampler_state`.
+
 ## 2026-11-02 - Phase 06 refinement: clearer water and richer waves
 
 Branch: `water-clarity-and-waves` (off main at `b02bdb7`). Merge status: see `git log` on main.

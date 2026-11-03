@@ -96,4 +96,37 @@
 #define WATER_RAIN_RIPPLE      0.12   // extra small ripples at full rain
 #define WATER_UNDERWATER_DESAT 0.25   // underwater fog color desaturation
 
+// ---- Clouds (Phase 07) ----
+// Cirrus clouds are painted on the sky from a noise texture, so the shader needs only
+// three texture reads and no procedural noise. Texture: assets/textures/environment/
+// CirrusTexture.png (made by scripts/generate_cirrus_texture.py), bound as the buffer
+// "noisetexture". R = strands, G = veil mass, B = fine detail.
+#define CIRRUS_ENABLED 1
+#define CIRRUS_SCALE 0.8           // bigger = smaller clouds
+#define CIRRUS_DOME 0.35           // 0 = flat plane (strong perspective), higher = flatter dome
+#define CIRRUS_ROTATION 18.0       // degrees: direction the strands and the wind run
+#define CIRRUS_SPEED 0.002         // wind speed in texture tiles per second
+#define CIRRUS_COVERAGE 0.50       // 0..1, how much of the veil mass shows
+#define CIRRUS_SOFTNESS 0.60       // softness of veil edges
+#define CIRRUS_ENV_LOW 0.46        // large clear / cloudy regions (LOW must stay below HIGH);
+#define CIRRUS_ENV_HIGH 0.62       // closer values give sharper regions
+#define CIRRUS_WARP 0.06           // how much the veil bends the strands
+#define CIRRUS_VEIL_BASE 0.35      // veil density where there are no strands
+#define CIRRUS_STRAND_LOW 0.80     // strand threshold (LOW below HIGH): higher = fewer strands
+#define CIRRUS_STRAND_HIGH 0.97
+#define CIRRUS_DETAIL 0.35         // fine detail inside the veil
+#define CIRRUS_WISP_REACH 0.32     // how far strands stray out of the veil
+#define CIRRUS_OPACITY 0.88
+#define CIRRUS_SHADING 0.55        // thick parts shift toward the shade color
+#define CIRRUS_SUN_GLOW 0.55       // silver lining near the sun
+#define CIRRUS_TWILIGHT_TINT 0.70  // how much the sun color tints the clouds (1 = fully)
+#define CIRRUS_COLOR_LIGHT vec3(1.00, 1.00, 1.00)   // lit parts
+#define CIRRUS_COLOR_SHADE vec3(0.60, 0.68, 0.82)   // thick, shaded parts
+#define CIRRUS_COLOR_NIGHT vec3(0.12, 0.14, 0.20)   // at night
+// The vanilla block clouds (Clouds material). 0 hides them so only the cirrus remain.
+// If both are off there are no clouds at all.
+#define VANILLA_CLOUDS 0
+// Reflect the cirrus in water (3 more texture reads, water pixels only).
+#define WATER_REFLECT_CLOUDS 1
+
 #endif

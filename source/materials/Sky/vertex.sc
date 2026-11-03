@@ -1,47 +1,45 @@
-$input a_color0, a_position, a_texcoord0
-#ifdef INSTANCING
-    $input i_data1, i_data2, i_data3
+// The sky is drawn as a full-screen quad: the view direction is rebuilt per pixel
+// from the inverse view-projection matrix, so the sky does not depend on the shape
+// of the engine's sky mesh. (Same technique as the sky material of newb-aerotion.)
+// The instanced variant draws nothing, otherwise the sky would be drawn twice.
+#ifndef INSTANCING
+  $input a_color0, a_position
+  $output v_skyEnvA, v_worldPos, v_skyEnvB, v_skyEnvC
 #endif
-
-$output v_color0, v_texcoord0, v_worldPos
 
 #include <bgfx_shader.sh>
-#include "origin/function/sky.h"
 
-uniform vec4 SkyColor;
-uniform vec4 FogColor;
-uniform vec4 TimeOfDay;
-uniform vec4 DimensionID;
-uniform vec4 RenderDistance;
-uniform vec4 FogAndDistanceControl;
+#ifndef INSTANCING
+  #include "origin/function/sky.h"
 
-void main() {
-    vec3 worldPosition;
-#ifdef INSTANCING
-    mat4 model = mtxFromCols(i_data1, i_data2, i_data3, vec4(0.0, 0.0, 0.0, 1.0));
-    worldPosition = instMul(model, vec4(a_position, 1.0)).xyz;
-#else
-    worldPosition = mul(u_model[0], vec4(a_position, 1.0)).xyz;
+  uniform vec4 FogColor;
+  uniform vec4 FogAndDistanceControl;
+  uniform vec4 ViewPositionAndTime;
+  uniform vec4 TimeOfDay;
+  uniform vec4 DimensionID;
+  uniform vec4 RenderDistance;
 #endif
 
-    // Sky colors are computed per vertex (the dome has few vertices), so the
-    // fragment shader stays a plain pass-through. The dome is assumed to be
-    // centered on the camera, so the world position is used as view direction.
+void main() {
+#ifndef INSTANCING
+    // Environment: all the trigonometry happens here, once per vertex of the quad.
     environment env = calculateEnvironment(
         TimeOfDay.x,
         FogColor.rgb,
         vec3(FogAndDistanceControl.xy, RenderDistance.x),
         DimensionID.x);
 
-    vec3 skyCol = calculateSkyColor(
-        env,
-        a_color0.x,
-        normalize(worldPosition),
-        SkyColor.rgb,
-        FogColor.rgb);
+    v_skyEnvA = vec4(env.daylight, env.nightFactor, env.dawnFactor, env.duskFactor);
+    v_skyEnvB = vec4(env.rainFactor, env.underwater ? 1.0 : 0.0, cirrusWindPhase(ViewPositionAndTime.w), env.dimension);
+    v_skyEnvC = vec4(env.sunDir, 0.0);
 
-    v_color0 = vec4(skyCol, mix(SkyColor.a, FogColor.a, a_color0.x));
-    v_texcoord0 = a_texcoord0;
-    v_worldPos = worldPosition;
-    gl_Position = mul(u_viewProj, vec4(worldPosition, 1.0));
+    // Background quad.
+    vec4 pos = vec4(a_position.xzy, 1.0);
+    pos.xy = 2.0 * clamp(pos.xy, -0.5, 0.5);
+
+    v_worldPos = mul(u_invViewProj, pos).xyz;
+    gl_Position = pos;
+#else
+    gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+#endif
 }
