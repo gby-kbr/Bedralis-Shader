@@ -3,6 +3,7 @@ $input v_clipPosition, v_worldPosition, v_color0, v_ditheringAndMaskTinting, v_f
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/DitherUtil.dragonh>
 #include "origin/function/lighting.h"
+#include "origin/function/tonemap.h"
 #if WATER_REFLECT_CLOUDS
   #define WATER_CLOUD_REFLECTION
 #endif
@@ -82,6 +83,7 @@ void main() {
     }
 #endif
     diffuse.rgb = mix(diffuse.rgb, v_fog.rgb, v_fog.a);
+    diffuse.rgb = bedralisGrade(diffuse.rgb);
 
     gl_FragColor = diffuse;
 #endif

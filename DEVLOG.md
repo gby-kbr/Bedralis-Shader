@@ -1,5 +1,26 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 09: Advanced visual effects
+
+Branch: `phase-09-advanced-effects` (off main at `438ebfb`). Merge status: see `git log` on main.
+
+Changes:
+- `tonemap.h` (was empty): `bedralisGrade()`; `godrays.h` (was a stub): `applySunGlow()`.
+- `Sky`, `RenderChunk`, `Actor`, `Weather` fragments call the grade; `Sky` also calls the sun glow.
+- `configuration.h`: `GRADE_*`, `SUN_*`.
+
+Decisions:
+- Only effects that work without a depth or color buffer; the rest is listed as not possible in PROGRESS.md.
+- The grade is applied after fog in every material, with one shared curve, so nothing disagrees at the horizon.
+- Sun shafts reuse the cirrus noise texture (already bound in Sky): one extra read, skipped when far from the sun or when `SUN_SHAFT_STRENGTH` is 0.
+
+Build / test results:
+- Real shader compile: NOT run (no compiler available).
+- Python port: the grade is monotonic on a 0..3 grey ramp, outputs 0..1, mid grey stays 0.5; sky + glow reaches 1.14 before the grade (the shoulder compresses it, nothing is clipped hard). Rendered 4 scenes (midday near the sun, sunset, sunrise, rain); shafts are visible near the sun at midday and absent in rain. In the sunset/sunrise views the sun was out of frame, so dawn/dusk shafts were not looked at.
+- Preview is a Python approximation, not a Minecraft screenshot. In-game test: NOT run.
+
+Assumptions still unverified: `atan2` compiles on all backends (Aerotion uses it); `cross()` is available; dynamic early-outs are cheap on mobile GPUs; the grade defaults look right in game.
+
 ## 2026-11-03 - Phase 08 follow-up: weather texture and rain particles
 
 Branch: `weather-textures-and-particles` (off main at `aecd0ea`). Merge status: see `git log` on main.

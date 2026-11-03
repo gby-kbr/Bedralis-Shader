@@ -3,6 +3,7 @@ $input v_color0, v_fog, v_occlusionHeight, v_occlusionUV, v_texcoord0, v_worldPo
 #include <bgfx_shader.sh>
 #include <MinecraftRenderer.Materials/FogUtil.dragonh>
 #include "origin/function/weather.h"
+#include "origin/function/tonemap.h"
 
 uniform vec4 OcclusionHeightOffset;
 
@@ -47,6 +48,7 @@ void main() {
         vec2 lightingUV = vec2(uvX, 1.0);
         vec3 light = texture2D(s_LightingTexture, lightingUV).rgb;
         diffuse = shadeWeather(diffuse, light, v_fog.rgb, v_fog.a, v_color0.x, v_color0.zw, v_color0.y);
+        diffuse.rgb = bedralisGrade(diffuse.rgb);
     }
     gl_FragColor = diffuse;
 }

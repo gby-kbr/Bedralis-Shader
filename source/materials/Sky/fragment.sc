@@ -6,6 +6,8 @@
 
 #ifndef INSTANCING
   #include "origin/function/clouds.h"
+  #include "origin/function/godrays.h"
+  #include "origin/function/tonemap.h"
 
   uniform vec4 SkyColor;
   uniform vec4 FogColor;
@@ -24,7 +26,13 @@ void main() {
     }
   #endif
 
-    gl_FragColor = vec4(color, 1.0);
+  #if SUN_GLOW_ENABLED
+    if (!env.underwater && !env.isNether && !env.isEnd) {
+        color = applySunGlow(color, env, viewDir, v_skyEnvB.z);
+    }
+  #endif
+
+    gl_FragColor = vec4(bedralisGrade(color), 1.0);
 #else
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif

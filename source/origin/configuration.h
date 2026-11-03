@@ -143,3 +143,22 @@
 #define WEATHER_RAIN_SKY_BLEND 0.35    // how much rain takes the sky/fog color (soft, misty look)
 #define WEATHER_SNOW_SOFT 0.0          // 0 = pack flake texture, 1 = soft round speck
 #define WEATHER_RAIN_DARKEN 0.85       // rain brightness at full daylight (lower = darker streaks)
+
+// ---------------------------------------------------------------------------
+// Advanced effects (Phase 09)
+// ---------------------------------------------------------------------------
+// Color grade applied at the end of terrain, actors, sky and weather (same curve
+// everywhere so the sky and the fog keep matching). Defaults are close to neutral.
+#define GRADE_ENABLED 1
+#define GRADE_EXPOSURE 1.00            // overall brightness
+#define GRADE_SATURATION 1.06          // 1 = unchanged
+#define GRADE_CONTRAST 1.03            // 1 = unchanged (around mid grey)
+#define GRADE_SHOULDER 0.82            // highlights above this roll off smoothly instead of clipping
+
+// Sun glow and light shafts in the sky (no depth buffer here, so shafts are painted
+// on the sky only and do not pass through terrain or clouds).
+#define SUN_GLOW_ENABLED 1
+#define SUN_HALO_STRENGTH 0.30         // tight halo around the sun disc
+#define SUN_BROAD_GLOW 0.10            // wide soft glow
+#define SUN_SHAFT_STRENGTH 0.22        // light shafts, 0 = off (also saves one texture read)
+#define SUN_SHAFT_COUNT 6.0            // how many times the shaft pattern repeats around the sun (integer)
