@@ -1,5 +1,23 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Phase 10 follow-up: 3D black hole above Earth's clouds, no settings
+
+Branch: `end-sky-3d-blackhole-earth` (off main at `6e7813a`). Merge status: see `git log` on main.
+
+Requested by the project owner: the black hole must look 3D and real, like the reference; the theme is above Earth with its clouds (not another planet); not too dark; no extra settings, since it is just `end_sky.png` in `environment`.
+- `scripts/generate_end_sky_texture.py` rewritten: the black hole is now a real ray trace (leapfrog integration of Schwarzschild null geodesics, observer at 14 Schwarzschild radii, 6.5 degrees above the disc plane, disc from 3 to 9 radii, Doppler and gravitational shift, swirl texture, about 0.9 million rays at 2x supersampling). The background behind it is looked up in the deflected direction, so the stars and the horizon glow are lensed. Earth's clouds are bright, with side lighting and a fine detail layer that fades toward the horizon.
+- Removed `END_SKY_BRIGHTNESS` and `END_SKY_ROTATION` from `configuration.h`; `endsky.h`, `EndSky` fragment and vertex lose the rotation and brightness code. The sky no longer turns.
+
+Problems found while tuning (fixed before merge):
+- First ray trace: the disc was dim grey (emission far too low for a disc that hides what is behind it); emission raised about 3x.
+- Hard seam at the edge of the traced patch; the patch now fades into the base sky and the lensing tapers to none at the edge.
+- Triangular cut-offs around bright stars (their halo was clipped by the neighbor-cell lookup); the halo now fades inside the cell.
+- Speckle noise in the clouds near the horizon; the fine layers fade out toward it.
+
+Build / test results:
+- Real shader compile: NOT run. Preview: Python port of the shader lookup plus the Uchimura tonemap, 6 views. Seam across 360 degrees: max step 0.004. After the tonemap the texture ranges 0.009..0.83 with mean 0.26 (the earlier version was darker).
+- The preview shows the sky box only (no terrain, no End fog). Not a Minecraft screenshot; in-game test NOT run.
+
 ## 2026-11-03 - Phase 10 follow-up: black hole and cloud sea (end_sky.png)
 
 Branch: `end-sky-blackhole-clouds` (off main at `f2b3b82`). Merge status: see `git log` on main.

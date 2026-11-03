@@ -154,9 +154,3 @@
 #define SUN_BROAD_GLOW 0.10            // wide soft glow
 #define SUN_SHAFT_STRENGTH 0.22        // light shafts, 0 = off (also saves one texture read)
 #define SUN_SHAFT_COUNT 6.0            // how many times the shaft pattern repeats around the sun (integer)
-
-// ---------------------------------------------------------------------------
-// The End sky (Phase 10)
-// ---------------------------------------------------------------------------
-#define END_SKY_BRIGHTNESS 1.0         // brightness of the outer-space texture
-#define END_SKY_ROTATION 0.00174533    // radians per second (one turn per hour); 0 = fixed sky

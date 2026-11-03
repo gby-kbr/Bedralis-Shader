@@ -5,7 +5,5 @@ $input v_color0, v_texcoord0, v_worldPos
 #include "origin/function/tonemap.h"
 
 void main() {
-    // v_color0 carries (cos, sin) of the sky rotation from the vertex shader.
-    vec3 dir = endSkyRotate(normalize(v_worldPos), v_color0.xy);
-    gl_FragColor = vec4(colorCorrection(endSkyColor(dir)), 1.0);
+    gl_FragColor = vec4(colorCorrection(endSkyColor(normalize(v_worldPos))), 1.0);
 }
