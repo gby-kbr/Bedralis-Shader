@@ -1,5 +1,17 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Phase 10 follow-up 3: stronger bloom, tilted disc, puffier clouds
+
+Branch: `end-sky-bloom-tilt-cumulus` (off `main` at `2278cac`). Merge status: MERGED to main (fast-forward).
+
+Changes (only `end_sky.png` and its generator script; no shader code touched):
+- Black hole: disc inclination 11 degrees plus a roll of -5 degrees so it is visibly tilted like the reference; much stronger multi-scale bloom (five blurs from tight to very wide, blue-white); the shadow is protected by the capture mask so it stays dark.
+- Clouds: cauliflower billows along the horizon (3D noise, height-dependent amplitude), stronger cloud shading, bank colour modulated around the azimuth, narrower flat band under the horizon.
+
+Problems found: billows over the glow caused streaks under the horizon until gated by cloud coverage; an inverted smoothstep once faded the clouds the wrong way (fixed).
+Known weaknesses: cloud sea near the horizon is a bit grainy; clouds straight below the camera are smooth (equirect pole stretch); look is still somewhat painterly.
+Build / test: not compiled and not tested in game. Preview is a Python port of the shader lookup + Uchimura, sky only (no terrain/fog).
+
 ## 2026-11-04 - Phase 10 follow-up 2: more 3D black hole, two-layer Earth clouds
 
 Branch: `end-sky-3d-v2` (off main at `71c1414`). Merge status: see `git log` on main.

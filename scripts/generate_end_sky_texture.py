@@ -103,11 +103,12 @@ def star_layer(d, radius, prob, sigma, bright_lo, bright_hi, power, salt, band_b
 
 # ----------------------------------------------------------------------------- black hole
 BH_AZ = -1.15            # azimuth of the black hole (radians, atan2(x, z) as in the shader)
-BH_EL = 0.10             # elevation of its center above the horizon
+BH_EL = 0.12             # elevation of its center above the horizon
 BH_THETA = 0.95          # radius of the patch that is ray traced (radians)
 BH_D = 11.5              # observer distance, in Schwarzschild radii (shadow radius ~ 2.6/D rad)
-BH_INC = math.radians(6.5)   # observer height above the disc plane
+BH_INC = math.radians(11.0)   # observer height above the disc plane
 RIN, ROUT = 3.0, 9.0     # accretion disc radii (ISCO .. outer edge)
+BH_ROLL = math.radians(-5.0)   # the disc is slightly rolled in the image (left end lower)
 SS = 2                   # supersampling of the ray traced patch
 
 def bh_frame():
@@ -172,7 +173,7 @@ def trace(x, y):
                 prof = (RIN / rh) ** 2.0 * ss(RIN, RIN * 1.12, rh) * (1 - ss(0.55 * ROUT, ROUT, rh))
                 tt = ss(RIN, ROUT, rh)[:, None]
                 col = hot[None] * (1 - tt) + cool[None] * tt
-                E = col * (prof * tex * g ** 3 * 2.4)[:, None]
+                E = col * (prof * tex * g ** 3 * 1.9)[:, None]
                 gi = idx[sel]
                 emit[gi] += trans[gi][:, None] * E
                 trans[gi] *= 0.12          # the disc is nearly opaque
@@ -206,6 +207,7 @@ def dir_to_uv(d):
 def composite_black_hole(base):
     """base: sky without clouds (H,W,3). Returns (sky with black hole, patch emission, bloom)."""
     c, e1, e2 = bh_frame()
+    e1, e2 = math.cos(BH_ROLL) * e1 + math.sin(BH_ROLL) * e2, -math.sin(BH_ROLL) * e1 + math.cos(BH_ROLL) * e2
     cu, cv = dir_to_uv(c)
     half_w = int(BH_THETA / (2 * np.pi) * W / max(math.cos(BH_EL), 0.2)) + 4
     half_h = int(BH_THETA / np.pi * H) + 4
@@ -249,12 +251,13 @@ def composite_black_hole(base):
     n_all = jj.shape[0] * jj.shape[1]
     patch = np.zeros((n_all, 3)); emit_img = np.zeros((n_all, 3)); mask = np.zeros(n_all)
     patch[sel] = color; emit_img[sel] = emit_vis; mask[sel] = soft
+    capt = np.zeros(n_all); capt[sel] = captured * soft
     shape = jj.shape
     def down(a):
         a = a.reshape(shape + (-1,)) if a.ndim == 2 else a.reshape(shape)
         h, w = shape
         return a.reshape(h // SS, SS, w // SS, SS, *a.shape[2:]).mean(axis=(1, 3))
-    patch = down(patch); emit_img = down(emit_img); mask = down(mask)
+    patch = down(patch); emit_img = down(emit_img); mask = down(mask); capt = down(capt)
     cols = (np.arange(i_c - half_w, i_c + half_w)) % W
     rows = np.arange(j0, j1)
     emit_full = np.zeros_like(base); emit_full[np.ix_(rows, cols)] = emit_img
@@ -262,9 +265,12 @@ def composite_black_hole(base):
     # Blurred on the whole image (wrapping around), so it has no edge where the patch ends.
     def blur(sig):
         return gaussian_filter(emit_full, (sig, sig, 0), mode=("nearest", "wrap", "nearest"))
-    glow_full = 0.50 * blur(3.0) + 0.45 * blur(10.0) + 0.38 * blur(30.0) + 0.26 * blur(75.0)
-    glow_full = glow_full * np.array([0.88, 0.97, 1.15]) * 1.35
-    glow_full += 0.22 * blur(140.0) * np.array([0.70, 0.90, 1.20])      # very wide halo
+    glow_full = 0.70 * blur(2.5) + 0.75 * blur(8.0) + 0.65 * blur(24.0) + 0.50 * blur(60.0) + 0.38 * blur(120.0)
+    glow_full = glow_full * np.array([0.90, 0.97, 1.12]) * 1.25
+    glow_full += 0.40 * blur(200.0) * np.array([0.70, 0.90, 1.25])      # very wide halo
+    capt_full = np.zeros(base.shape[:2]); capt_full[np.ix_(rows, cols)] = capt
+    capt_full = gaussian_filter(capt_full, 2.0, mode=("nearest", "wrap"))
+    glow_full = glow_full * (1.0 - 0.80 * capt_full)[..., None]      # the shadow stays dark
     cur = base[np.ix_(rows, cols)]
     m = mask[..., None]
     out = base.copy()
@@ -322,7 +328,7 @@ def render_rows(j0, j1):
 
     # --- Earth: two cloud layers (parallax), lit from the black hole side
     below = y < 0.0
-    ys = np.minimum(y, -0.035)
+    ys = np.minimum(y, -0.016)
     t = 1.0 / (-ys)
     Ldir = ch * 0.07
     def layer(scale, depth, salt, fine_w):
@@ -334,15 +340,17 @@ def render_rows(j0, j1):
                 + fine_w * (0.14 * fbm(Pq * 9.0 + 5.0, salt + 18, 3) + 0.08 * fbm(Pq * 24.0 + 2.0, salt + 19, 2)) + (1.0 - fine_w) * 0.11
         return Pw, hgt
     fine = ss(-0.30, -0.10, y)
-    Pw, hgt = layer(1.4, 1.0, SEED + 800, fine)
+    Pw, hgt = layer(1.15, 1.0, SEED + 800, fine)
     cn = hgt(Pw)
     cl_n = hgt(Pw + np.array([Ldir[0], Ldir[1], 0.0], np.float32))
     puff = fbm(Pw * 3.2 + 3.0, SEED + 820, 3)
     dens = np.clip(ss(0.40, 0.54, cn) * (0.75 + 0.55 * puff), 0.0, 1.0)
-    slope = np.clip(0.52 + (cn - cl_n) * 12.0, 0.0, 1.0)
-    lit = np.clip(0.30 + 0.70 * slope, 0, 1) * (0.55 + 0.45 * dens)
+    slope = np.clip(0.50 + (cn - cl_n) * 22.0, 0.0, 1.0)
+    towers = ss(0.46, 0.72, cn)                                   # tall parts of the cumulus catch more light
+    rim = 4.0 * dens * (1.0 - dens) * near ** 2                   # bright rim on the edges facing the light
+    lit = np.clip(0.10 + 0.62 * slope + 0.32 * towers + 0.28 * rim, 0, 1) ** 1.25 * (0.40 + 0.60 * dens)
     bright = 0.62 + 0.55 * near ** 2
-    c_shadow = np.array([0.30, 0.38, 0.56], np.float32)
+    c_shadow = np.array([0.16, 0.22, 0.40], np.float32)
     c_lit = np.array([0.98, 0.95, 0.88], np.float32)
     top = c_shadow + (c_lit - c_shadow) * (lit * bright)[..., None]
 
@@ -360,31 +368,63 @@ def render_rows(j0, j1):
 
     cloud = lower + (top - lower) * dens[..., None]
     # Distance haze: far clouds fade into the horizon glow.
-    far = ss(-0.24, -0.04, y)       # 1 at the horizon, 0 well below it
-    cloud = haze * far[..., None] + cloud * (1.0 - far)[..., None]
-    return sky.astype(np.float32), cloud.astype(np.float32), below.astype(np.float32), dens.astype(np.float32), lit.astype(np.float32)
+    far = ss(-0.11, -0.016, y)       # 1 at the horizon, 0 well below it
+    # Near the horizon the cloud sea fades into the base of the cloud bank (not into blue haze),
+    # so the billows sit on it.
+    bank = np.array([0.14, 0.20, 0.38], np.float32) + (np.array([0.98, 0.95, 0.90], np.float32) - np.array([0.14, 0.20, 0.38], np.float32)) * (0.46 * (0.45 + 0.55 * near ** 2))[..., None]
+    az_ring = np.stack([np.cos(np.arctan2(d[..., 0], d[..., 2])) * 5.0, np.sin(np.arctan2(d[..., 0], d[..., 2])) * 5.0, np.full_like(y, 1.7)], -1).astype(np.float32)
+    bank = bank * (0.70 + 0.55 * fbm(az_ring, SEED + 990, 4))[..., None] * (0.80 + 0.20 * ss(-0.11, 0.0, y))[..., None]
+    bank = bank * 0.85 + haze * 0.15
+    cloud = bank * far[..., None] + cloud * (1.0 - far)[..., None]
+    # Cloud tops that rise above the horizon line: cauliflower-shaped billows seen against the
+    # glow. A 3D noise in (azimuth circle, height) gives round puffs without a seam.
+    phi = np.arctan2(d[..., 0], d[..., 2])
+    yp = np.maximum(y, 0.0)
+    low = fbm(np.stack([np.cos(phi) * 2.0, np.sin(phi) * 2.0, np.full_like(phi, 0.5)], -1).astype(np.float32), SEED + 950, 3)
+    amp = 0.012 + 0.060 * ss(0.38, 0.62, low)                                  # how high the bank rises
+    prof = 1.0 - yp / amp                                                      # 1 at the horizon, 0 at the top
+    def puffs(sh_phi, sh_y):
+        K = 55.0
+        pp = np.stack([np.cos(phi + sh_phi) * K, np.sin(phi + sh_phi) * K, (yp + sh_y) * K], -1).astype(np.float32)
+        return 0.55 * fbm(pp, SEED + 960, 3) + 0.30 * fbm(pp * 2.3 + 5.0, SEED + 965, 3) + 0.15 * fbm(pp * 5.0 + 9.0, SEED + 970, 2)
+    pn = puffs(0.0, 0.0)
+    val = pn + 1.05 * (prof - 0.45)
+    cov = ss(0.46, 0.54, val) * (y >= 0.0) * (prof > -0.2)
+    side = np.sign(math.sin(BH_AZ))                                            # light comes from the black hole side
+    pl = puffs(-0.012 * side, 0.008)
+    slope_b = np.clip(0.50 + (pn - pl) * 16.0, 0.0, 1.0)
+    shade = np.clip(0.25 + 0.55 * slope_b + 0.35 * ss(0.0, 0.8, prof), 0.0, 1.0)
+    c_lit2 = np.array([0.98, 0.95, 0.90], np.float32)
+    c_dark2 = np.array([0.14, 0.20, 0.38], np.float32)
+    bcol = c_dark2 + (c_lit2 - c_dark2) * (shade * (0.45 + 0.55 * near ** 2))[..., None]
+    bcol = bcol * 0.80 + (base + limb) * 0.20                                  # a little haze
+    return (sky.astype(np.float32), cloud.astype(np.float32), below.astype(np.float32), dens.astype(np.float32),
+            lit.astype(np.float32), cov.astype(np.float32), bcol.astype(np.float32))
 
 def main():
-    skies, clouds, belows, denss, lits = [], [], [], [], []
+    skies, clouds, belows, denss, lits, bcovs, bcols = [], [], [], [], [], [], []
     step = 64
     for j in range(0, H, step):
-        a, b, c_, d_, e_ = render_rows(j, min(j + step, H))
-        skies.append(a); clouds.append(b); belows.append(c_); denss.append(d_); lits.append(e_)
+        a, b, c_, d_, e_, f_, g_ = render_rows(j, min(j + step, H))
+        skies.append(a); clouds.append(b); belows.append(c_); denss.append(d_); lits.append(e_); bcovs.append(f_); bcols.append(g_)
         print(f"row {j}/{H}", end="\r", flush=True)
     sky = np.concatenate(skies, 0).astype(np.float64); cloud = np.concatenate(clouds, 0).astype(np.float64)
     below = np.concatenate(belows, 0).astype(bool); dens = np.concatenate(denss, 0).astype(np.float64)
     lit = np.concatenate(lits, 0).astype(np.float64)
+    bcov = np.concatenate(bcovs, 0).astype(np.float64); bcol = np.concatenate(bcols, 0).astype(np.float64)
     print()
     sky_bh, emit_full, glow_full = composite_black_hole(sky)
 
     # The Earth is opaque: everything below the horizon is cloud. It is never bent by the black hole.
     # Light of the ring and disc is reflected by the cloud tops (the image mirrored about the horizon).
     yrow = np.cos((np.arange(H) + 0.5) / H * np.pi)[:, None]
-    on_cloud = 1.0 - ss(-0.24, -0.04, yrow)       # 0 in the haze band at the horizon, 1 over the clouds
+    on_cloud = 1.0 - ss(-0.11, -0.016, yrow)       # 0 in the haze band at the horizon, 1 over the clouds
     refl = gaussian_filter(emit_full[::-1], (10.0, 28.0, 0), mode=("nearest", "wrap", "nearest"))
     cloud = cloud + refl * (0.30 * (0.25 + 0.75 * dens) * (0.35 + 0.65 * lit) * on_cloud)[..., None]
     cloud = cloud + glow_full[::-1] * (0.22 * (0.4 + 0.6 * dens) * on_cloud)[..., None]   # scattered glow over the cloud tops
     img = np.where(below[..., None], cloud, sky_bh)
+    img = img * (1.0 - bcov[..., None]) + bcol * bcov[..., None]            # billows in front of the black hole and the glow
+    img = img + glow_full * (0.20 * bcov)[..., None]                         # the glow lights their edges
 
     img = 1.0 - np.exp(-img * 1.25)
     img = np.clip(img, 0, 1) ** (1.0 / 1.15)
