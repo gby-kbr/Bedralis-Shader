@@ -148,12 +148,16 @@
 // Advanced effects (Phase 09)
 // ---------------------------------------------------------------------------
 // Color grade applied at the end of terrain, actors, sky and weather (same curve
-// everywhere so the sky and the fog keep matching). Defaults are close to neutral.
+// everywhere so the sky and the fog keep matching). Tonemap: Uchimura (Gran Turismo).
 #define GRADE_ENABLED 1
 #define GRADE_EXPOSURE 1.00            // overall brightness
 #define GRADE_SATURATION 1.06          // 1 = unchanged
-#define GRADE_CONTRAST 1.03            // 1 = unchanged (around mid grey)
-#define GRADE_SHOULDER 0.82            // highlights above this roll off smoothly instead of clipping
+#define UCHIMURA_MAX 1.0               // P: max display brightness
+#define UCHIMURA_CONTRAST 1.0          // a: contrast of the linear section
+#define UCHIMURA_LINEAR_START 0.22     // m: where the linear section starts
+#define UCHIMURA_LINEAR_LENGTH 0.4     // l: length of the linear section
+#define UCHIMURA_BLACK 1.33            // c: toe power, higher = deeper shadows (1.0 = no toe)
+#define UCHIMURA_PEDESTAL 0.0          // b: black level lift
 
 // Sun glow and light shafts in the sky (no depth buffer here, so shafts are painted
 // on the sky only and do not pass through terrain or clouds).

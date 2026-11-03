@@ -19,14 +19,14 @@ Status values: NOT STARTED, IN PROGRESS, TESTING, COMPLETED, MERGED.
 ## Phase 09 details
 
 Done:
-- `tonemap.h`: `bedralisGrade()` (saturation, contrast, soft highlight shoulder; near neutral by default). Applied at the end of `RenderChunk`, `Actor`, `Sky` and `Weather` fragments so sky, fog and terrain keep matching. `SunMoon` and `Stars` are left alone so the sun disc stays bright.
+- `tonemap.h`: `bedralisGrade()` = exposure, Uchimura tonemap (function and default values from newb-aerotion, no gamma step), saturation. Tunable with `UCHIMURA_*`; `UCHIMURA_BLACK` 1.0 removes the shadow toe. Note: an input of 1.0 comes out at about 0.83 and 0.5 stays 0.5, so raise `GRADE_EXPOSURE` slightly if the image looks dim. Applied at the end of `RenderChunk`, `Actor`, `Sky` and `Weather` fragments so sky, fog and terrain keep matching. `SunMoon` and `Stars` are left alone so the sun disc stays bright.
 - `godrays.h`: `applySunGlow()` in the Sky fragment: tight halo, broad glow and soft light shafts (one noise-texture read indexed by the angle around the sun, very slow drift, longer reach at dawn/dusk, off in rain, at night, underwater, Nether and End).
 - `configuration.h`: `GRADE_*`, `SUN_*` macros (`GRADE_ENABLED`, `SUN_GLOW_ENABLED`, `SUN_SHAFT_STRENGTH` 0 turns the shafts off).
 
 Deliberately not done (not possible in this pipeline: no depth buffer, no scene color, no extra passes):
 - Real screen-space god rays, bloom, depth of field, SSAO, motion blur, screen-space reflections, volumetric fog.
 - Shafts do not pass through terrain or clouds; they are painted on the sky only.
-- Auto exposure and a full filmic tonemap: they would need the scene color, and a per-material curve that is not near neutral would make materials disagree.
+- Auto exposure: it would need the scene color.
 
 ## Phase 08 details
 

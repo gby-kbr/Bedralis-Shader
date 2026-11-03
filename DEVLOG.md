@@ -1,5 +1,14 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-03 - Tonemap: Uchimura
+
+Branch: `tonemap-uchimura` (off main at `1352b44`). Merge status: see `git log` on main.
+
+Requested by the project owner: use the Uchimura tonemap from their tonemap.h.
+- `tonemap.h`: the grade now runs the Uchimura curve (P 1.0, a 1.0, m 0.22, l 0.4, c 1.33, b 0.0, as in the provided file), then saturation. Replaces my earlier contrast + shoulder. The gamma step of that file is not used, since this pipeline already works in display values.
+- `configuration.h`: `GRADE_CONTRAST`/`GRADE_SHOULDER` replaced by `UCHIMURA_*`.
+- Checked in Python: monotonic on 0..3, maximum 0.998, no jumps; 0.05 gives 0.033, 0.22 gives 0.22, 0.5 gives 0.5, 1.0 gives 0.83. So shadows get deeper and highlights a little dimmer than before. Not compiled, not tested in game.
+
 ## 2026-11-03 - Phase 09: Advanced visual effects
 
 Branch: `phase-09-advanced-effects` (off main at `438ebfb`). Merge status: see `git log` on main.
