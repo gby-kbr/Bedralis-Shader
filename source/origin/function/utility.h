@@ -10,6 +10,8 @@ vec4 mix(vec4 a, vec4 b, float t) { return lerp(a, b, t); }
 float mixf(float a, float b, float t) { return a + (b - a) * t; }
 
 #define PI 3.141592
+#define PI_HALF 1.570796
+#define PI_QUART 0.785398
 
 mat2 rmat2(float t) {
     float sint = sin(t);

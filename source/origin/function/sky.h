@@ -100,7 +100,7 @@ vec3 renderOverworldSky(skycolor skyCol, environment env, vec3 viewDir, bool isS
   return sky;
 }
 
-vec3 renderSky(skycolor skycol, environment env, vec3 viewDir, bool isSkyPlane) {
+vec3 renderSky(skycolor skycol, environment env, vec3 viewDir, float t, bool isSkyPlane) {
   viewDir.y = -viewDir.y;
   return renderOverworldSky(skycol, env, viewDir, isSkyPlane);
 }

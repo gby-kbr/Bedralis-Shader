@@ -18,6 +18,8 @@ void main() {
     vec3 viewDir = normalize(v_worldPos);
 
     environment env;
+    env.end = false;
+    env.nether = false;
     env.underwater = detectUnderwater(FogColor.rgb, FogAndDistanceControl.xy);
     env.rainFactor = detectRain(FogAndDistanceControl.xyz);
     env.dayFactor = 0.0;
@@ -26,7 +28,7 @@ void main() {
 
     skycolor skycol = overworldSkyColors(env);
 
-    vec3 skyColor = renderSky(skycol, env, -viewDir, true);
+    vec3 skyColor = renderSky(skycol, env, -viewDir, 0.0, true);
     skyColor = colorCorrection(skyColor);
 
     gl_FragColor = vec4(skyColor, 1.0);

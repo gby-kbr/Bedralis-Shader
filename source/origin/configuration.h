@@ -29,5 +29,54 @@
 //#define TINT
 #define TINT_LOW  vec3(0.3,0.5,1.4)
 #define TINT_HIGH vec3(1.4,0.7,0.3)
+#define AURORA 1.2
+#define AURORA_COL1 vec3(0.1,1.0,0.0)
+#define AURORA_COL2 vec3(0.1,0.0,1.0)
+#define AURORA_SCALE 0.04
+#define AURORA_VELOCITY 0.03
+#define AURORA_WIDTH 0.18
+#define CAUSTIC_INTENSITY 1.9
+#define CLOUD1_SCALE vec2(0.016, 0.022)
+#define CLOUD1_SPEED 0.04
+#define CLOUD2_SCALE vec2(0.033, 0.033)
+#define CLOUD2_SHAPE vec2(0.5, 0.4)
+#define CLOUD2_VELOCITY 0.8
+#define CLOUD3_SHADOW_OFFSET 0.3
+#define CLOUD_AURORA_REFLECTION
+#define CLOUD_SHADOW
+#define CLOUD_TYPE 1
+#define DAWN_SUNLIGHT_COL   vec3(1.0,0.4,0.1)
+#define END_AMBIENT    vec3(1.98,1.25,2.3)
+#define END_TORCH_COL        vec3(1.0,0.52,0.18)
+#define ENTITY_BRIGHTNESS     0.65
+#define ENTITY_EDGE_HIGHLIGHT 0.41
+#define GLOW_SHIMMER 0.8
+#define GLOW_SHIMMER_SPEED 0.9
+#define GLOW_TEX 2.3
+#define GROUND_RAIN_PUDDLES 0.7
+#define GROUND_RAIN_WETNESS 1.0
+#define LANTERN_WAVE 0.16
+#define LAVA_NOISE_SPEED 0.2
+#define MIN_LIGHTING_BOOST   1.5
+#define MIST_DENSITY 0.18
+#define NETHER_AMBIENT vec3(3.0,2.16,1.89)
+#define NETHER_TORCH_COL     vec3(1.0,0.52,0.18)
+#define NIGHT_MOONLIGHT_COL vec3(0.01,0.03,0.2)
+#define NOON_SUNLIGHT_COL   vec3(1.0,0.75,0.57)
+#define OVERWORLD_TORCH_COL  vec3(1.0,0.52,0.18)
+#define PLANTS_WAVE 0.05
+#define SHADOW_INTENSITY     0.7
+#define SUNLIGHT_INTENSITY   3.3
+#define TORCHLIGHT_INTENSITY 1.0
+#define UNDERWATER_BRIGHTNESS 0.8
+#define UNDERWATER_TORCH_COL vec3(1.0,0.52,0.18)
+#define UNDERWATER_WAVE 0.1
+#define WATER_BUMP 0.09
+#define WATER_TINT vec3(0.52,0.9,0.45)
+#define WATER_TRANSPARENCY 0.9
+#define WATER_WAVE
+#define WATER_WAVE_SPEED  0.8
+#define WAVE_RANGE 13.0
+#define WAVE_SPEED 2.8
 
 #endif

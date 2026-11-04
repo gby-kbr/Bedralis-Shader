@@ -1,0 +1,92 @@
+#ifndef GLOW_H
+#define GLOW_H
+
+#include "origin/configuration.h"
+#include "origin/function/sky.h"
+
+vec3 glowDetect(vec4 diffuse) {
+
+  if (diffuse.a > 0.988 && diffuse.a < 0.993) {
+    vec3 glow = diffuse.rgb * diffuse.rgb;
+    if (diffuse.a > 0.989) {
+      return 0.4 * glow;
+    }
+    return glow;
+  }
+  return vec3(0.0,0.0,0.0);
+}
+
+vec3 glowDetectC(sampler2D tex, vec2 uv) {
+  return glowDetect(texture2DLod(tex, uv, 0.0));
+}
+
+vec3 glowDetectD(sampler2D tex, vec2 uv, vec2 offset, vec2 st) {
+  offset *= step(offset*st, vec2_splat(0.0));
+
+  return glowDetectC(tex, uv+offset);
+}
+
+vec3 glow(sampler2D tex, vec2 uv, float shimmer) {
+  vec3 glow = glowDetectC(tex, uv);
+  #ifdef GLOW_LEAK
+
+    vec2 texSize = vec2(textureSize(tex, 0));
+    vec2 offset = 1.0 / texSize;
+
+    float boundSize = texSize.x/64.0;
+    vec2 st = boundSize*fract(64.0*uv*(texSize/texSize.x)) - 0.5*boundSize;
+    st = sign(st)*step(vec2_splat(0.5*boundSize-1.01), abs(st));
+
+    vec3 c1 = glowDetectD(tex, uv, offset*vec2(-1,-1), st);
+    vec3 c2 = glowDetectD(tex, uv, offset*vec2(-1, 0), st);
+    vec3 c3 = glowDetectD(tex, uv, offset*vec2(-1, 1), st);
+    vec3 c4 = glowDetectD(tex, uv, offset*vec2( 0, 1), st);
+    vec3 c5 = glowDetectD(tex, uv, offset*vec2( 1, 1), st);
+    vec3 c6 = glowDetectD(tex, uv, offset*vec2( 1, 0), st);
+    vec3 c7 = glowDetectD(tex, uv, offset*vec2( 1,-1), st);
+    vec3 c8 = glowDetectD(tex, uv, offset*vec2( 0,-1), st);
+
+    vec2 p = uv * texSize;
+    vec2 u = fract(p);
+
+    vec2 v = 1.0 - u;
+
+    vec3 g = mix(mix(c1, c3, u.y), mix(c7, c5, u.y), u.x);
+
+    g = max(g, max(max(c2*v.x, c4*u.y), max(c6*u.x, c8*v.y)));
+
+    g = ((g*0.7 + 0.2)*g + 0.1)*g;
+    glow = max(glow, g*GLOW_LEAK);
+  #endif
+
+  #ifdef GLOW_SHIMMER
+    glow *= shimmer;
+  #endif
+
+  return glow * GLOW_TEX;
+}
+
+#ifdef GLOW_SHIMMER
+float glowShimmer(vec3 cPos, float t) {
+  float shimmer = sin(0.7*dot(cPos, vec3(1.0, 1.0, 1.0)) - GLOW_SHIMMER_SPEED*t);
+  shimmer = sin(1.2*shimmer + 0.7*dot(cPos, vec3(-1.0, -1.0, 1.0)));
+  shimmer *= shimmer;
+  return mix(1.0, shimmer*shimmer, GLOW_SHIMMER);
+}
+#endif
+
+vec4 glint(vec4 light, vec4 layerUV, sampler2D glintTexture, vec4 glintColor, vec4 tileLightColor, vec4 albedo) {
+  float d = fract(dot(albedo.rgb, vec3_splat(4.0)));
+
+  vec4 tex1 = texture2D(glintTexture, fract(layerUV.xy+0.1*d)).rgbr;
+  vec4 tex2 = texture2D(glintTexture, fract(layerUV.zw+0.1*d)).rgbr;
+
+  vec4 glint = (tex1*tex1 + tex2*tex2) * tileLightColor * glintColor;
+
+  light.rgb = light.rgb*(1.0-0.4*glint.a) + 80.0*glint.rgb;
+  light.rgb += vec3(0.1,0.0,0.1) + 0.2*spectrum(sin(layerUV.x*9.42477 + 2.0*glint.a + d));
+
+  return light;
+}
+
+#endif
