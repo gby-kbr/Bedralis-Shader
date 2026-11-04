@@ -40,30 +40,6 @@ def get_materials_path(mats: [str]):
     return material_patterns
 
 
-def create_pack_manifest(config: dict) -> dict:
-    return {
-        'format_version': 2,
-        'header': {
-            "name": config['name'],
-            "description": config['description'],
-            "uuid": config['uuid'],
-            "version": config['version'],
-            "min_engine_version": config['min_supported_mc_version']
-        },
-        'modules': [
-            {
-                'type': 'resources',
-                'uuid': config['module_uuid'],
-                'version': config['version']
-            }
-        ],
-        'metadata': {
-            'authors': config['authors'],
-            'url': config['url']
-        }
-    }
-
-
 def load_conf():
     try:
         with open(CONF_FILE, 'rb') as file:

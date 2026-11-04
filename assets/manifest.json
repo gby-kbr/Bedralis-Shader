@@ -1,0 +1,17 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Bedralis Shader",
+    "description": "Realistic Shader for minecraft bedrock. \nDesigned purely for Minecraft Bedrock and without using vibrant visual graphics. \nauthor : Goboyy22",
+    "uuid": "282dc73f-272f-4ce7-868d-e1540db798fa",
+    "version": [1, 0, 1],
+    "min_engine_version": [1, 26, 60]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "656c2e5a-dd19-4ef2-9730-26186f2f467f",
+      "version": [1, 0, 0]
+    }
+  ]
+}

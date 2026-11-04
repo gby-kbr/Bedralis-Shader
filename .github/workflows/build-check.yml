@@ -28,4 +28,4 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         .\build.bat setup
-        .\build.bat pack -p multiplatform -v 99 --no-zip
+        .\build.bat pack -p multiplatform --no-zip

@@ -5,7 +5,7 @@ import tomllib
 from importlib import import_module, metadata
 from rich.console import Console
 from rich.status import Status
-from util import print_styled_error, get_materials_path, create_pack_manifest, check_conf, SHADERC_PATH
+from util import print_styled_error, get_materials_path, check_conf, SHADERC_PATH
 from lazurite import util
 
 console = Console()
@@ -117,14 +117,11 @@ def run(args):
             console.print(f"~ Error in 'pack_config.toml': \n  {e.args[0]}", style="bold red")
             exit(1)
 
-    if args.v:
-        if args.v.isdigit():
-            pack_config['version'][-1] = int(args.v)
-        else:
-            console.print("[yellow]Ignoring invalid version number '" + args.v + "' specified using -v")
+    with open(os.path.join('assets', 'manifest.json'), 'rb') as f:
+        manifest = json.load(f)
 
-    pack_name: str = pack_config['name']
-    pack_version = ".".join(str(v) for v in pack_config['version'])
+    pack_name: str = manifest['header']['name']
+    pack_version = ".".join(str(v) for v in manifest['header']['version'])
     pack_authors = ', '.join(pack_config['authors'])
     profile: str = args.p
 
@@ -145,22 +142,6 @@ def run(args):
         shutil.rmtree(pack_dir)
     shutil.copytree('assets', pack_dir)
 
-    pack_description: str = pack_config['description']
-
-    patch_warning = "Only works with "
-    if profile == 'android':
-        patch_warning += "MB Loader"
-    if profile == 'ios':
-        patch_warning += "Minecraft with Hynis"
-    elif profile == 'windows':
-        patch_warning += "Wyvern Loader"
-    elif profile == 'multiplatform':
-        patch_warning += "MB Loader (Android) or Wyvern Loader (Windows) or Minecraft with Hynis (iOS)"
-
-    pack_description = pack_description.replace("%w", patch_warning).replace("%v", "v" + pack_version + "-" + args.p)
-    pack_config['description'] = pack_description
-    pack_manifest = create_pack_manifest(pack_config)
-
     console.print("\n~ Build materials", style="bold")
 
     status.start()
@@ -172,9 +153,6 @@ def run(args):
     _build(status, args.p, pack_config['materials'], mats_dir)
 
     status.stop()
-
-    with open(os.path.join(pack_dir, 'manifest.json'), 'w') as f:
-        json.dump(pack_manifest, f, indent=2)
 
     pack_copyright: str = pack_config['info']['copyright']
     pack_copyright = pack_copyright.replace("%a", pack_authors)

@@ -1,16 +1,5 @@
-name = "Bedralis Shader"
-version = [1, 0, 1]
-min_supported_mc_version = [1, 26, 60]
-description = '''
-Realistic Shader for Minecraft Bedrock.
-%w
-%v
-author: Goboyy22
-'''
 authors = ["Goboyy22"]
 url = "https://github.com/gby-kbr/Bedralis-Shader"
-uuid = "282dc73f-272f-4ce7-868d-e1540db798fa"
-module_uuid = "656c2e5a-dd19-4ef2-9730-26186f2f467f"
 materials = ["Actor", "Clouds", "EndSky", "RenderChunk", "Sky", "Stars", "SunMoon", "Weather"]
 
 [info]

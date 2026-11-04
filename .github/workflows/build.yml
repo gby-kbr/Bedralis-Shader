@@ -2,12 +2,6 @@ name: build
 
 on:
   workflow_dispatch:
-    inputs:
-      subversion:
-        description: 'Sub-version, the last number of the pack version (eg: 1)'
-        required: true
-        default: '1'
-        type: string
 
 jobs:
   multiplatform:
@@ -26,7 +20,7 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         .\build.bat setup
-        .\build.bat pack -p multiplatform -v ${{ inputs.subversion }}
+        .\build.bat pack -p multiplatform
     - uses: actions/upload-artifact@v4
       with:
         name: bedralis-multiplatform
