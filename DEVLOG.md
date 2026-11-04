@@ -1,5 +1,18 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Build tool and workflows
+
+Branch: `feat/build-tool` (off `main` at `8f9d020`).
+
+Changes:
+- `tool/` (Python, based on the Newb Shader builder by devendrn and checked against kren-0x/RenderDragon-Shader-Template): `setup` downloads shaderc and the base material definitions (`src-materials-1.26.60.zip`, all 8 Bedralis materials are inside) from the devendrn `dev` release; `pack` builds a pack with Lazurite 0.12.0 and writes the manifest; `mats` builds single materials. `build.sh`, `build.bat`, `requirements.txt`.
+- `source/pack_config.toml` holds name, version, uuids and the material list; `assets/manifest.json` is now generated from it (removed from `assets`).
+- `source/materials/project.json`: merge source fixed to `../../tool/data/materials` (was `tools`), profiles `android`, `ios`, `windows`, `multiplatform`.
+- Workflows: `build` (manual, multi-platform artifact) and `build-check` (pull requests, pushes to `main`, manual; same multi-platform build, fails on any compiler error or warning).
+
+Build / test results:
+- Python syntax, TOML and manifest generation checked locally. Lazurite cannot be installed in the session (PyPI blocked), so the real build runs only in GitHub Actions. Result of the first CI run: see the pull request.
+
 ## 2026-11-04 - Lantern and chain swing
 
 Branch: `feat/lantern-wave` (off `main` at `f76abcc`). Merge status: MERGED to main.

@@ -66,3 +66,9 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# build tool
+build/
+tool/data/
+tool/lib/
+__pycache__/
