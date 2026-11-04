@@ -84,7 +84,7 @@ def _build(status: Status, profile: str, materials: [str], output_path: str):
 
     try:
         lp.compile(
-            project_path=os.path.join('src', 'materials'),
+            project_path=os.path.join('source', 'materials'),
             profiles=[profile],
             output_folder=output_path,
             material_patterns=material_patterns,
