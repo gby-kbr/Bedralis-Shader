@@ -12,7 +12,7 @@
 // Include this header only in fragment shaders of materials that have the buffer
 // buffers/noisetexture.json: it declares the sampler (sampler name = s_ + buffer name).
 //
-// Texture channels (see scripts/generate_cirrus_texture.py), all uniform 0..1 so a
+// Texture channels (see scripts/generate_cirrus_texture.py), all uniform 0 to 1 so a
 // threshold maps directly to a coverage fraction:
 //   R : strands, G : veil mass, B : fine detail.
 SAMPLER2D_AUTOREG(s_noisetexture);

@@ -38,7 +38,7 @@ vec3 applySunGlow(vec3 col, environment env, vec3 dir, float phase) {
   float halo = sd16 * sd16 * sd16 * SUN_HALO_STRENGTH + sd4 * sd2 * SUN_BROAD_GLOW;
   float glow = halo;
 
-#if SUN_SHAFT_STRENGTH > 0.0
+#if SUN_SHAFT_ON
   // Angle around the sun, in the plane perpendicular to the sun direction.
   vec3 b1 = normalize(cross(env.sunDir, vec3(0.0, 0.0, 1.0)));
   vec3 b2 = cross(env.sunDir, b1);

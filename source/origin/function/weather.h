@@ -23,7 +23,7 @@ vec2 weatherParticleSize(bool isRain, vec2 engineSize) {
   return engineSize * WEATHER_SNOW_SIZE;
 }
 
-// Soft round speck, 0..1, from the quad UV (0..1). Used for snowflakes.
+// Soft round speck, 0 to 1, from the quad UV (0 to 1). Used for snowflakes.
 float weatherSpeck(vec2 quadUV) {
   vec2 g = 2.0 * quadUV - 1.0;
   g = 1.0 - g * g;
@@ -37,8 +37,8 @@ float weatherSpeck(vec2 quadUV) {
 //   skyFog  : atmospheric fog color (Phase 04) = sky horizon color
 //   fogA    : engine fog intensity for the particle
 //   isRain  : 1 for rain, 0 for snow
-//   quadUV  : 0..1 position inside the particle quad
-//   day     : daylight factor, 0..1
+//   quadUV  : 0 to 1 position inside the particle quad
+//   day     : daylight factor, 0 to 1
 vec4 shadeWeather(vec4 diffuse, vec3 light, vec3 skyFog, float fogA, float isRain, vec2 quadUV, float day) {
   // Snow: blend the engine flake toward a soft round speck.
   float speck = weatherSpeck(quadUV);

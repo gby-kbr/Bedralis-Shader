@@ -10,7 +10,7 @@
 struct environment {
   bool underwater;
   float rainFactor;     // 0 = clear, 1 = full rain (smooth)
-  float dayFactor;      // sine of sun elevation, -1..1 (before orbit tilt/yaw)
+  float dayFactor;      // sine of sun elevation, -1 to 1 (before orbit tilt/yaw)
   float daylight;       // 0 = night, 1 = full day (smooth)
   float nightFactor;    // 0 = day, 1 = full night (smooth)
   float dawnFactor;     // twilight weight while the sun is rising (smooth)

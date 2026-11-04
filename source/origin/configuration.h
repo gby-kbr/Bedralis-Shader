@@ -106,7 +106,7 @@
 #define CIRRUS_DOME 0.35           // 0 = flat plane (strong perspective), higher = flatter dome
 #define CIRRUS_ROTATION 18.0       // degrees: direction the strands and the wind run
 #define CIRRUS_SPEED 0.002         // wind speed in texture tiles per second
-#define CIRRUS_COVERAGE 0.50       // 0..1, how much of the veil mass shows
+#define CIRRUS_COVERAGE 0.50       // 0 to 1, how much of the veil mass shows
 #define CIRRUS_SOFTNESS 0.60       // softness of veil edges
 #define CIRRUS_ENV_LOW 0.46        // large clear / cloudy regions (LOW must stay below HIGH);
 #define CIRRUS_ENV_HIGH 0.62       // closer values give sharper regions
@@ -140,5 +140,24 @@
 #define PLANT_WAVE_ATLAS_ROWS  32.0   // rows of 16px tiles in the terrain atlas (vanilla 1024x512)
 #define LANTERN_WAVE_ON        1      // 0 turns the lantern and chain swing off
 #define LANTERN_WAVE           0.14   // lantern and chain swing in radians at full wind
+
+// Weather
+#define WEATHER_RAIN_SLANT 1.5         // 1.0 = engine slant, higher = rain leans more with the wind
+#define WEATHER_RAIN_WIDTH 0.28        // rain streak width scale (the pack texture is already thin)
+#define WEATHER_RAIN_LENGTH 0.50       // rain streak length scale
+#define WEATHER_SNOW_SIZE 0.50         // snowflake size scale
+#define WEATHER_RAIN_OPACITY 0.85      // rain streak opacity scale
+#define WEATHER_SNOW_OPACITY 0.95      // snowflake opacity scale
+#define WEATHER_RAIN_SKY_BLEND 0.35    // how much rain takes the sky/fog color (soft, misty look)
+#define WEATHER_SNOW_SOFT 0.0          // 0 = pack flake texture, 1 = soft round speck
+#define WEATHER_RAIN_DARKEN 0.85       // rain brightness at full daylight (lower = darker streaks)
+
+// Sun glow and light shafts
+#define SUN_GLOW_ENABLED 1
+#define SUN_HALO_STRENGTH 0.30         // tight halo around the sun disc
+#define SUN_BROAD_GLOW 0.10            // wide soft glow
+#define SUN_SHAFT_ON 1                 // 0 turns the light shafts off (also saves one texture read)
+#define SUN_SHAFT_STRENGTH 0.22        // light shaft strength
+#define SUN_SHAFT_COUNT 6.0            // how many times the shaft pattern repeats around the sun (integer)
 
 #endif
