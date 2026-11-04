@@ -62,12 +62,6 @@ def main():
         help="don't label materials"
     )
 
-    pack_parser.add_argument(
-        '-v',
-        default="",
-        help="version number eg: 46"
-    )
-
     args = parser.parse_args()
 
     if args.subcommand is not None:
