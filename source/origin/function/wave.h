@@ -71,4 +71,86 @@ vec3 waterNormal(vec2 p, float t, float rain, float dist) {
   return normalize(vec3(-g.x, 1.0, -g.y));
 }
 
+// Plant, leaf and vine sway, evaluated per vertex in the RenderChunk vertex shader.
+//
+// Wind is a slow travelling gust field plus fast per-position flutter. Every term is a
+// function of the vertex position only, so vertices shared by neighbouring quads (leaf
+// blocks) move together and no gaps open. All wave vectors are integer multiples of
+// 2*PI/64, so positions can be wrapped to 64 blocks to keep float precision.
+//
+// What waves (same detection idea as Newb, tuned on vertex colors and block-local position):
+//   leaves, tall grass, ferns, sugar cane : biome-tinted quads in the alpha-test pass
+//   vines                                 : tinted quads sitting on a block wall
+//   crops, flowers, saplings              : only the top vertices (top half of the texture tile)
+// Ground plants are anchored at the bottom, so only top vertices move.
+//
+//   gPos     : absolute world position of the vertex
+//   cPos     : chunk-local vertex position (a_position)
+//   color    : vertex color (a_color0)
+//   uv0      : decoded atlas uv
+//   skyLight : lightmap sky value 0..1 (no wind in caves and under roofs)
+//   t        : time in seconds
+//   rain     : 0..1, stronger and faster wind
+//   camDist  : camera distance, sway fades out at PLANT_WAVE_RANGE
+vec3 plantWaveOffset(vec3 gPos, vec3 cPos, vec4 color, vec2 uv0, float skyLight, float t, float rain, float camDist) {
+  if (camDist > PLANT_WAVE_RANGE) {
+    return vec3(0.0, 0.0, 0.0);
+  }
+
+  vec3 bPos = fract(cPos);
+  vec2 bPosC = abs(bPos.xz - 0.5);
+  vec2 bPosH = fract(bPos.xz * 2.0);
+
+  bool isTop = fract(uv0.y * PLANT_WAVE_ATLAS_ROWS) < 0.5;
+  bool isColored = color.r != color.g || color.r != color.b;
+  bool isLeaves = (isColored && (bPos.x + bPos.y + bPos.z < 0.001)) || color.a == 0.0;
+  bool isGrass = isColored && color.r < 1.9 * color.g;
+  bool isVines = (bPosC.x == 0.453125 && bPos.z == 0.0) || (bPosC.y == 0.453125 && bPos.x == 0.0);
+  bool isFarmPlant = bPos.y == 0.9375 && (bPosC.x == 0.25 || bPosC.y == 0.25);
+  bool isLeafLitter = bPos.y == 0.015625 && (bPosH.x + bPosH.y) == 0.0;
+  bool isCross = bPosC.x > 0.32 && bPosC.x < 0.39 && bPosC.y > 0.32 && bPosC.y < 0.39;
+
+  float weight = 0.0;
+  float amp = 1.0;
+  if (isColored && !isLeafLitter && (isLeaves || isGrass || isVines)) {
+    if (isLeaves) {
+      weight = 1.0;
+      amp = PLANT_WAVE_LEAVES;
+    } else if (isVines) {
+      weight = isTop ? 0.5 : 1.0;
+      amp = PLANT_WAVE_VINES;
+    } else {
+      weight = isTop ? 1.0 : 0.0;
+    }
+  } else if ((isFarmPlant || isCross) && isTop) {
+    weight = 1.0;
+  }
+
+  if (weight == 0.0) {
+    return vec3(0.0, 0.0, 0.0);
+  }
+
+  float fade = 1.0 - smoothstep(0.5 * PLANT_WAVE_RANGE, PLANT_WAVE_RANGE, camDist);
+
+  const float k = 0.09817477;
+  vec3 p = gPos - 64.0 * floor(gPos / 64.0);
+  float tt = t * PLANT_WAVE_SPEED;
+
+  float gust = 0.5 + 0.28 * sin(dot(p.xz, vec2(2.0, 1.0) * k) - 0.55 * tt)
+                   + 0.22 * sin(dot(p.xz, vec2(-1.0, 3.0) * k) - 0.83 * tt + 1.7);
+  float wind = (0.35 + 0.65 * gust) * (1.0 + 1.0 * rain);
+
+  float flutter = 0.65 * sin(dot(p, vec3(5.0, 3.0, 4.0) * k) + (2.4 + 1.6 * rain) * tt)
+                + 0.35 * sin(dot(p, vec3(-3.0, 6.0, 2.0) * k) + (3.7 + 2.0 * rain) * tt + 1.3);
+
+  float sway = wind * (0.8 + 0.2 * flutter);
+  float exposure = skyLight * skyLight;
+  float a = PLANT_WAVE_STRENGTH * amp * weight * fade * exposure * sway;
+
+  vec2 dir = vec2(0.8, 0.6);
+  vec2 off = dir * a + vec2(-dir.y, dir.x) * (0.25 * a * flutter);
+
+  return vec3(off.x, -0.5 * dot(off, off), off.y);
+}
+
 #endif

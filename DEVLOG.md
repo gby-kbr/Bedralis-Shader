@@ -1,5 +1,20 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Plant wave (leaves, grass, crops, flowers, vines)
+
+Branch: `feat/plant-wave` (off `main` at `e6ed9e2`). Merge status: MERGED to main.
+
+Changes:
+- `wave.h`: new `plantWaveOffset()`. Wind is two slow travelling gust waves plus fast per-position flutter; all wave vectors are multiples of 2*PI/64 so positions wrap at 64 blocks (float precision far from the origin, no seams). Offsets depend only on vertex position, so shared leaf vertices move together.
+- Detection follows Newb (vertex color, block-local position, top half of the atlas tile) and adds crossed-plane flowers by their diagonal vertex offsets. Ground plants move only their top vertices; leaves and vines move all vertices at lower strength.
+- `RenderChunk/vertex.sc`: applies the offset in the alpha-test pass before the clip position; uses `CameraPosition` for the absolute position.
+- `configuration.h`: `PLANT_WAVE*` settings (strength, leaves, vines, speed, range, atlas rows).
+
+Build / test results:
+- shaderc: RenderChunk vertex compiles (ESSL 300/310, SPIR-V; ALPHA_TEST, INSTANCING, OPAQUE, TRANSPARENT, DEPTH_ONLY_ALPHA_TEST, billboards, seasons). RenderChunk fragment for SPIR-V already failed before this change (unrelated).
+- Numeric test of the real function in WebGL: grass tips move 0.03 to 0.10 blocks (up to about 0.2 in rain), bottoms stay fixed, nothing moves in caves or beyond `PLANT_WAVE_RANGE`, the result is identical after 64 blocks and finite at 3 million blocks from the origin.
+- In-game test: NOT run. Unverified assumptions: `PLANT_WAVE_ATLAS_ROWS` (32), the vertex color rules, the crossed-plane offsets (about 0.146 / 0.854) and that `CameraPosition` makes the position absolute.
+
 ## 2026-11-04 - Phase 11: Final optimization and QC
 
 Branch: `phase-11-final-qc` (off `main` at `86fda94`). Merge status: MERGED to main (fast-forward).

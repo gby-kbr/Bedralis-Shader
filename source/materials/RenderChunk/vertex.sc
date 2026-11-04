@@ -9,6 +9,7 @@ $output v_clipPosition, v_color0, v_ditheringAndMaskTinting, v_fog, v_lightmapUV
 #include <MinecraftRenderer.Materials/TAAUtil.dragonh>
 #include "origin/function/fog.h"
 #include "origin/function/lighting.h"
+#include "origin/function/wave.h"
 
 uniform vec4 RenderChunkFogAlpha;
 uniform vec4 FogAndDistanceControl;
@@ -20,6 +21,7 @@ uniform vec4 TimeOfDay;
 uniform vec4 DimensionID;
 uniform vec4 RenderDistance;
 uniform vec4 MoonPhase;
+uniform vec4 CameraPosition;
 
 void main() {
 #ifdef INSTANCING
@@ -67,6 +69,13 @@ void main() {
     float ditherX = float((uv1_16.x & 256u) != 0u ? 1.0 : 0.0);
     float ditherY = float((uv1_16.y & 256u) != 0u ? 1.0 : 0.0);
     vec2 ditheringAndMaskTinting = vec2(ditherX, ditherY);
+
+#if PLANT_WAVE && defined(ALPHA_TEST) && !defined(RENDER_AS_BILLBOARDS)
+    // Sway uses the absolute world position so the wind field is continuous across chunks.
+    float waveCamDist = length(ViewPositionAndTime.xyz - worldPos);
+    float waveRain = detectRain(vec3(FogAndDistanceControl.xy, RenderDistance.x));
+    worldPos += plantWaveOffset(worldPos + CameraPosition.xyz, a_position, a_color0, uv0, lightmapY, ViewPositionAndTime.w, waveRain, waveCamDist);
+#endif
 
     vec4 position = jitterVertexPosition(worldPos);
 
