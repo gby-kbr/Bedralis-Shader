@@ -106,7 +106,7 @@
 #define CIRRUS_DOME 0.35           // 0 = flat plane (strong perspective), higher = flatter dome
 #define CIRRUS_ROTATION 18.0       // degrees: direction the strands and the wind run
 #define CIRRUS_SPEED 0.002         // wind speed in texture tiles per second
-#define CIRRUS_COVERAGE 0.50       // 0..1, how much of the veil mass shows
+#define CIRRUS_COVERAGE 0.50       // 0 to 1, how much of the veil mass shows
 #define CIRRUS_SOFTNESS 0.60       // softness of veil edges
 #define CIRRUS_ENV_LOW 0.46        // large clear / cloudy regions (LOW must stay below HIGH);
 #define CIRRUS_ENV_HIGH 0.62       // closer values give sharper regions

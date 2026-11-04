@@ -28,7 +28,7 @@ vec3 celestialBodyTint(environment env, vec3 viewDir) {
   return mix(moonDiscTint(env), sunDiscTint(env), sunSide);
 }
 
-// Moonlight strength from the MoonPhase uniform (x = phase index 0..7,
+// Moonlight strength from the MoonPhase uniform (x = phase index 0 to 7,
 // 0 = full moon, 4 = new moon). Not used for the disc itself (the atlas already
 // shows the phase); meant for night lighting in Phase 05.
 float moonlightFromPhase(float moonPhase) {

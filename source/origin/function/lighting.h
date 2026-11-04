@@ -44,7 +44,7 @@ float blockLightWarmth(environment env) {
 
 // Applies the Bedralis light color to the engine lightmap color.
 //   lightmapRGB : color sampled from the engine lightmap
-//   lightUV     : (block light, sky light), 0..1, as used for the lightmap lookup
+//   lightUV     : (block light, sky light), 0 to 1, as used for the lightmap lookup
 //   tint        : xyz = skyLightTint(), w = blockLightWarmth() (from the vertex shader)
 vec3 applyBedralisLight(vec3 lightmapRGB, vec2 lightUV, vec4 tint) {
   float blockL = clamp(lightUV.x, 0.0, 1.0);

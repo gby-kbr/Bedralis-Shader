@@ -27,7 +27,7 @@ float waterWaveHeight(vec2 p, float t) {
 
 //   p    : world position xz
 //   t    : time in seconds
-//   rain : 0..1, adds small fast ripples
+//   rain : 0 to 1, adds small fast ripples
 //   dist : camera distance
 vec3 waterNormal(vec2 p, float t, float rain, float dist) {
   p = p - 64.0 * floor(p / 64.0);
@@ -71,7 +71,7 @@ vec3 waterNormal(vec2 p, float t, float rain, float dist) {
   return normalize(vec3(-g.x, 1.0, -g.y));
 }
 
-// Shared wind field: x = gust strength (0..~2 in rain), y = flutter (-1..1).
+// Shared wind field: x = gust strength (0 to ~2 in rain), y = flutter (-1 to 1).
 vec2 windField(vec3 gPos, float t, float rain) {
   const float k = 0.09817477;
   vec3 p = gPos - 64.0 * floor(gPos / 64.0);
@@ -103,9 +103,9 @@ vec2 windField(vec3 gPos, float t, float rain) {
 //   cPos     : chunk-local vertex position (a_position)
 //   color    : vertex color (a_color0)
 //   uv0      : decoded atlas uv
-//   skyLight : lightmap sky value 0..1 (no wind in caves and under roofs)
+//   skyLight : lightmap sky value 0 to 1 (no wind in caves and under roofs)
 //   t        : time in seconds
-//   rain     : 0..1, stronger and faster wind
+//   rain     : 0 to 1, stronger and faster wind
 //   camDist  : camera distance, sway fades out at PLANT_WAVE_RANGE
 vec3 plantWaveOffset(vec3 gPos, vec3 cPos, vec4 color, vec2 uv0, float skyLight, float t, float rain, float camDist) {
   if (camDist > PLANT_WAVE_RANGE) {
@@ -167,7 +167,7 @@ vec3 plantWaveOffset(vec3 gPos, vec3 cPos, vec4 color, vec2 uv0, float skyLight,
 // Hanging stacks pivot per block, so a long chain can open tiny gaps at its joints; keep
 // LANTERN_WAVE small.
 //
-//   lightmapUV : x = block light, y = sky light (both 0..1)
+//   lightmapUV : x = block light, y = sky light (both 0 to 1)
 vec3 lanternWaveOffset(vec3 gPos, vec3 cPos, vec2 uv0, vec2 lightmapUV, float t, float rain, float camDist) {
   if (camDist > PLANT_WAVE_RANGE || lightmapUV.x < 0.6) {
     return vec3(0.0, 0.0, 0.0);

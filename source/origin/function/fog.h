@@ -35,7 +35,7 @@ vec3 atmosphericFogColor(environment env, vec3 viewDir, vec3 vanillaSky, vec3 va
 //   distNorm   : camera distance divided by the fog max distance (as the engine does)
 //   worldY     : world height of the vertex in blocks
 //   viewDirY   : y component of the normalized camera-to-vertex direction
-//   exposure   : 0..1, how much the vertex is open to the sky (sky light); 1 if unknown
+//   exposure   : 0 to 1, how much the vertex is open to the sky (sky light); 1 if unknown
 float atmosphericFogIntensity(environment env, float vanillaFog, float distNorm, float worldY, float viewDirY, float exposure) {
   // Only the Overworld gets extra fog; underwater keeps the engine's value.
   if (env.underwater || env.isNether || env.isEnd) {

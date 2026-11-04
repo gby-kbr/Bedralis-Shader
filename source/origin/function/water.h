@@ -42,8 +42,8 @@ vec3 underwaterFogColor(vec3 vanillaFog) {
 //   timeOfDay     : TimeOfDay.x
 //   moonPhase     : MoonPhase.x
 //   horizonColor  : sky horizon color (the atmospheric fog color)
-//   rain          : 0..1 rain factor
-//   skyExposure   : 0..1 sky light, hides reflections in caves and under roofs
+//   rain          : 0 to 1 rain factor
+//   skyExposure   : 0 to 1 sky light, hides reflections in caves and under roofs
 vec4 shadeWater(vec4 water, vec3 worldPos, vec3 camPos, float time, float timeOfDay, float moonPhase, vec3 horizonColor, float rain, float skyExposure) {
   vec3 toPos = worldPos - camPos;
   float dist = length(toPos);
