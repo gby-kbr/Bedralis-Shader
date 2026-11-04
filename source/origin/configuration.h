@@ -141,4 +141,23 @@
 #define LANTERN_WAVE_ON        1      // 0 turns the lantern and chain swing off
 #define LANTERN_WAVE           0.14   // lantern and chain swing in radians at full wind
 
+// Weather
+#define WEATHER_RAIN_SLANT 1.5         // 1.0 = engine slant, higher = rain leans more with the wind
+#define WEATHER_RAIN_WIDTH 0.28        // rain streak width scale (the pack texture is already thin)
+#define WEATHER_RAIN_LENGTH 0.50       // rain streak length scale
+#define WEATHER_SNOW_SIZE 0.50         // snowflake size scale
+#define WEATHER_RAIN_OPACITY 0.85      // rain streak opacity scale
+#define WEATHER_SNOW_OPACITY 0.95      // snowflake opacity scale
+#define WEATHER_RAIN_SKY_BLEND 0.35    // how much rain takes the sky/fog color (soft, misty look)
+#define WEATHER_SNOW_SOFT 0.0          // 0 = pack flake texture, 1 = soft round speck
+#define WEATHER_RAIN_DARKEN 0.85       // rain brightness at full daylight (lower = darker streaks)
+
+// Sun glow and light shafts
+#define SUN_GLOW_ENABLED 1
+#define SUN_HALO_STRENGTH 0.30         // tight halo around the sun disc
+#define SUN_BROAD_GLOW 0.10            // wide soft glow
+#define SUN_SHAFT_ON 1                 // 0 turns the light shafts off (also saves one texture read)
+#define SUN_SHAFT_STRENGTH 0.22        // light shaft strength
+#define SUN_SHAFT_COUNT 6.0            // how many times the shaft pattern repeats around the sun (integer)
+
 #endif
