@@ -70,11 +70,17 @@ void main() {
     float ditherY = float((uv1_16.y & 256u) != 0u ? 1.0 : 0.0);
     vec2 ditheringAndMaskTinting = vec2(ditherX, ditherY);
 
-#if PLANT_WAVE && defined(ALPHA_TEST) && !defined(RENDER_AS_BILLBOARDS)
+#if (PLANT_WAVE || LANTERN_WAVE_ON) && defined(ALPHA_TEST) && !defined(RENDER_AS_BILLBOARDS)
     // Sway uses the absolute world position so the wind field is continuous across chunks.
     float waveCamDist = length(ViewPositionAndTime.xyz - worldPos);
     float waveRain = detectRain(vec3(FogAndDistanceControl.xy, RenderDistance.x));
-    worldPos += plantWaveOffset(worldPos + CameraPosition.xyz, a_position, a_color0, uv0, lightmapY, ViewPositionAndTime.w, waveRain, waveCamDist);
+    vec3 waveGPos = worldPos + CameraPosition.xyz;
+#if PLANT_WAVE
+    worldPos += plantWaveOffset(waveGPos, a_position, a_color0, uv0, lightmapY, ViewPositionAndTime.w, waveRain, waveCamDist);
+#endif
+#if LANTERN_WAVE_ON
+    worldPos += lanternWaveOffset(waveGPos, a_position, uv0, lightmapUV, ViewPositionAndTime.w, waveRain, waveCamDist);
+#endif
 #endif
 
     vec4 position = jitterVertexPosition(worldPos);

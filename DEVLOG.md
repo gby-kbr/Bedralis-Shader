@@ -1,5 +1,18 @@
 # Bedralis Shader - Development Log
 
+## 2026-11-04 - Lantern and chain swing
+
+Branch: `feat/lantern-wave` (off `main` at `f76abcc`). Merge status: MERGED to main.
+
+Changes:
+- `wave.h`: `lanternWaveOffset()` swings lanterns and chains like a pendulum about the top of their block (Rodrigues rotation, radius preserved), driven by a shared `windField()` that the plant sway now uses too. Detection uses the exact lantern and chain model sizes from Newb plus block light > 0.6.
+- `RenderChunk/vertex.sc`: applies it in the alpha-test pass; `configuration.h`: `LANTERN_WAVE_ON`, `LANTERN_WAVE` (radians).
+
+Build / test results:
+- shaderc: RenderChunk vertex compiles (ESSL 300/310, SPIR-V, all variants).
+- WebGL numeric test of the real function: swing up to about 0.04 blocks (0.09 in rain), lanterns under a roof or with low block light stay still, rotation keeps the distance to the pivot, no NaN.
+- In-game test: NOT run. Unverified: the exact bPos values of the 26.60 lantern and chain models, and the atlas row check for standing lanterns. Stacked chains pivot per block, so joints may show tiny gaps.
+
 ## 2026-11-04 - Plant wave (leaves, grass, crops, flowers, vines)
 
 Branch: `feat/plant-wave` (off `main` at `e6ed9e2`). Merge status: MERGED to main.

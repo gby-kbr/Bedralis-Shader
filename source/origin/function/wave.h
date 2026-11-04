@@ -71,6 +71,21 @@ vec3 waterNormal(vec2 p, float t, float rain, float dist) {
   return normalize(vec3(-g.x, 1.0, -g.y));
 }
 
+// Shared wind field: x = gust strength (0..~2 in rain), y = flutter (-1..1).
+vec2 windField(vec3 gPos, float t, float rain) {
+  const float k = 0.09817477;
+  vec3 p = gPos - 64.0 * floor(gPos / 64.0);
+  float tt = t * PLANT_WAVE_SPEED;
+
+  float gust = 0.5 + 0.28 * sin(dot(p.xz, vec2(2.0, 1.0) * k) - 0.55 * tt)
+                   + 0.22 * sin(dot(p.xz, vec2(-1.0, 3.0) * k) - 0.83 * tt + 1.7);
+  float wind = (0.35 + 0.65 * gust) * (1.0 + 1.0 * rain);
+
+  float flutter = 0.65 * sin(dot(p, vec3(5.0, 3.0, 4.0) * k) + (2.4 + 1.6 * rain) * tt)
+                + 0.35 * sin(dot(p, vec3(-3.0, 6.0, 2.0) * k) + (3.7 + 2.0 * rain) * tt + 1.3);
+  return vec2(wind, flutter);
+}
+
 // Plant, leaf and vine sway, evaluated per vertex in the RenderChunk vertex shader.
 //
 // Wind is a slow travelling gust field plus fast per-position flutter. Every term is a
@@ -132,16 +147,9 @@ vec3 plantWaveOffset(vec3 gPos, vec3 cPos, vec4 color, vec2 uv0, float skyLight,
 
   float fade = 1.0 - smoothstep(0.5 * PLANT_WAVE_RANGE, PLANT_WAVE_RANGE, camDist);
 
-  const float k = 0.09817477;
-  vec3 p = gPos - 64.0 * floor(gPos / 64.0);
-  float tt = t * PLANT_WAVE_SPEED;
-
-  float gust = 0.5 + 0.28 * sin(dot(p.xz, vec2(2.0, 1.0) * k) - 0.55 * tt)
-                   + 0.22 * sin(dot(p.xz, vec2(-1.0, 3.0) * k) - 0.83 * tt + 1.7);
-  float wind = (0.35 + 0.65 * gust) * (1.0 + 1.0 * rain);
-
-  float flutter = 0.65 * sin(dot(p, vec3(5.0, 3.0, 4.0) * k) + (2.4 + 1.6 * rain) * tt)
-                + 0.35 * sin(dot(p, vec3(-3.0, 6.0, 2.0) * k) + (3.7 + 2.0 * rain) * tt + 1.3);
+  vec2 w = windField(gPos, t, rain);
+  float wind = w.x;
+  float flutter = w.y;
 
   float sway = wind * (0.8 + 0.2 * flutter);
   float exposure = skyLight * skyLight;
@@ -151,6 +159,60 @@ vec3 plantWaveOffset(vec3 gPos, vec3 cPos, vec4 color, vec2 uv0, float skyLight,
   vec2 off = dir * a + vec2(-dir.y, dir.x) * (0.25 * a * flutter);
 
   return vec3(off.x, -0.5 * dot(off, off), off.y);
+}
+
+// Swinging lanterns and chains: a small pendulum about the top of their block, driven by
+// the same wind field. Detection uses the exact block-local sizes of the lantern and chain
+// models (as Newb does) plus a block light check so unrelated geometry is left alone.
+// Hanging stacks pivot per block, so a long chain can open tiny gaps at its joints; keep
+// LANTERN_WAVE small.
+//
+//   lightmapUV : x = block light, y = sky light (both 0..1)
+vec3 lanternWaveOffset(vec3 gPos, vec3 cPos, vec2 uv0, vec2 lightmapUV, float t, float rain, float camDist) {
+  if (camDist > PLANT_WAVE_RANGE || lightmapUV.x < 0.6) {
+    return vec3(0.0, 0.0, 0.0);
+  }
+
+  vec3 bPos = fract(cPos);
+  vec2 bPosC = abs(bPos.xz - 0.5);
+  float texPosY = fract(uv0.y * PLANT_WAVE_ATLAS_ROWS);
+
+  bool y6875 = bPos.y == 0.6875;
+  bool y5625 = bPos.y == 0.5625;
+  bool isLantern = ((y6875 || y5625) && bPosC.x == 0.125) || ((y5625 || bPos.y == 0.125) && bPosC.x == 0.1875);
+  bool isChain = bPosC.x == 0.0625 && y6875;
+
+  if (y5625 && (texPosY < 0.001 || (texPosY > 0.43 && texPosY < 0.93))) {
+    isLantern = false;
+  }
+
+  if (!(isLantern || isChain)) {
+    return vec3(0.0, 0.0, 0.0);
+  }
+
+  float fade = 1.0 - smoothstep(0.5 * PLANT_WAVE_RANGE, PLANT_WAVE_RANGE, camDist);
+  vec2 w = windField(gPos, t, rain);
+  float tt = t * PLANT_WAVE_SPEED;
+  float phase = dot(floor(cPos), vec3(0.3927, 0.3927, 0.3927));
+  float exposure = lightmapUV.y * lightmapUV.y;
+  float amp = LANTERN_WAVE * w.x * fade * exposure;
+
+  float along = amp * (0.6 + 0.4 * sin(1.9 * tt + phase));
+  float across = 0.4 * amp * sin(1.3 * tt + phase + 1.0);
+
+  vec2 dir = vec2(0.8, 0.6);
+  vec3 axisAlong = vec3(-dir.y, 0.0, dir.x);
+  vec3 axisAcross = vec3(dir.x, 0.0, dir.y);
+
+  vec3 v = bPos - vec3(0.5, 1.0, 0.5);
+  float c1 = cos(along);
+  float s1 = sin(along);
+  vec3 r = v * c1 + cross(axisAlong, v) * s1 + axisAlong * (dot(axisAlong, v) * (1.0 - c1));
+  float c2 = cos(across);
+  float s2 = sin(across);
+  r = r * c2 + cross(axisAcross, r) * s2 + axisAcross * (dot(axisAcross, r) * (1.0 - c2));
+
+  return r - v;
 }
 
 #endif

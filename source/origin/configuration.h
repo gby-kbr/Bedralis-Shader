@@ -138,5 +138,7 @@
 #define PLANT_WAVE_SPEED       1.0    // wind speed multiplier
 #define PLANT_WAVE_RANGE       48.0   // sway fades out between half of this and this distance
 #define PLANT_WAVE_ATLAS_ROWS  32.0   // rows of 16px tiles in the terrain atlas (vanilla 1024x512)
+#define LANTERN_WAVE_ON        1      // 0 turns the lantern and chain swing off
+#define LANTERN_WAVE           0.14   // lantern and chain swing in radians at full wind
 
 #endif
