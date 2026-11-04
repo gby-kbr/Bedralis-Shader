@@ -26,8 +26,8 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         .\build.bat setup
-        .\build.bat pack -p multiplatform -v ${{ inputs.subversion }} --no-zip
+        .\build.bat pack -p multiplatform -v ${{ inputs.subversion }}
     - uses: actions/upload-artifact@v4
       with:
         name: bedralis-multiplatform
-        path: ./build/pack-multiplatform
+        path: ./build/*.mcpack
